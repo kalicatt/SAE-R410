@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('API-client/', include('client_app.urls')),
     path('API-reservation/', include('reservation_app.urls')),
+    path('API-flight-arrivals/', include('vols_arriver_app.urls')),
     path('api-auth/', include('rest_framework.urls'))
 ]

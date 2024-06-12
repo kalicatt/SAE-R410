@@ -1,3 +1,11 @@
-from django.shortcuts import render
+from rest_framework import generics
+from .models import FlightArrival
+from .serializers import FlightArrivalSerializer
 
-# Create your views here.
+class FlightArrivalListCreateView(generics.ListCreateAPIView):
+    queryset = FlightArrival.objects.all()
+    serializer_class = FlightArrivalSerializer
+
+class FlightArrivalDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = FlightArrival.objects.all()
+    serializer_class = FlightArrivalSerializer

@@ -39,45 +39,45 @@ class ClientApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    class ClientDetailApiView(APIView):
-        permission_classes = [permissions.IsAuthenticated]
+class ClientDetailApiView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-        def get(self, request, pk, *args, **kwargs):
-            client = Clients.objects.get(pk=pk)
-            if not client:
-                return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
-            serializer = ClientSerializer(client, many=False)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request, pk, *args, **kwargs):
+        client = Clients.objects.get(pk=pk)
+        if not client:
+            return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ClientSerializer(client, many=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
         
-        def delete(self, request, pk, *args, **kwargs):
-            client = Clients.objects.get(pk=pk)
-            if not client:
-                return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
-            client.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, pk, *args, **kwargs):
+        client = Clients.objects.get(pk=pk)
+        if not client:
+            return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
+        client.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-        def put(self, request, pk, *args, **kwargs):
-            client = Clients.objects.get(pk=pk)
-            if not client:
-                return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
+    def put(self, request, pk, *args, **kwargs):
+        client = Clients.objects.get(pk=pk)
+        if not client:
+            return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            data = {
-                'nom': request.data.get('nom'),
-                'prenom': request.data.get('prenom'),
-                'email': request.data.get('email'),
-                'mot_de_passe': request.data.get('mot_de_passe'),
-                'telephone': request.data.get('telephone'),
-                'adresse': request.data.get('adresse'),
-                'ville': request.data.get('ville'),
-                'code_postal': request.data.get('code_postal'),
-                'pays': request.data.get('pays'),
-            }
+        data = {
+            'nom': request.data.get('nom'),
+            'prenom': request.data.get('prenom'),
+            'email': request.data.get('email'),
+            'mot_de_passe': request.data.get('mot_de_passe'),
+            'telephone': request.data.get('telephone'),
+            'adresse': request.data.get('adresse'),
+            'ville': request.data.get('ville'),
+            'code_postal': request.data.get('code_postal'),
+            'pays': request.data.get('pays'),
+        }
 
-            serializer = ClientSerializer(instance=client, data=data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = ClientSerializer(instance=client, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
                 
     

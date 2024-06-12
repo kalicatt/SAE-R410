@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'Aeroport_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'clients_db',
+        'NAME': 'aeroport_db',
         'USER': 'root',
         'PASSWORD': 'azerty1234',
         'HOST': 'localhost',

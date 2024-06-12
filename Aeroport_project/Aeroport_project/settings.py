@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'client_app',
     'reservation_app',
+    'vols_arriver_app',
 ]
 
 MIDDLEWARE = [

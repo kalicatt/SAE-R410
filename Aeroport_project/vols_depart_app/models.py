@@ -6,7 +6,7 @@ class FlightDeparture(models.Model):
     flight_number = models.CharField(max_length=50)
     departure_time = models.DateTimeField()
     destination = models.CharField(max_length=100)
-    prix = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    prix = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.flight_number

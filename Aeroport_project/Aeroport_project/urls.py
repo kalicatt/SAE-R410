@@ -23,5 +23,6 @@ urlpatterns = [
     path('API-reservation/', include('reservation_app.urls')),
     path('API-flight-arrivals/', include('vols_arriver_app.urls')),
     path('API-flight-departures/', include('vols_depart_app.urls')),
+    path('API-staff/',include('staff_app.urls')),
     path('api-auth/', include('rest_framework.urls'))
 ]

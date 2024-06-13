@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'reservation_app',
     'vols_arriver_app',
     'vols_depart_app',
+    'staff_app',
 ]
 
 MIDDLEWARE = [

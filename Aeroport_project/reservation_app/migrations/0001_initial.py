@@ -19,9 +19,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('reservation_date', models.DateTimeField(auto_now_add=True)),
-                ('prix_ticket', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('client_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='client_app.clients')),
                 ('flight_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='vols_depart_app.flightdeparture')),
+                ('prix_ticket', models.DecimalField(decimal_places=2, max_digits=10)),
             ],
         ),
     ]

@@ -21,12 +21,12 @@ class ReservationListAPIView(APIView):
             flight = FlightDeparture.objects.get(id=flight_id)
             
             # Vérifier s'il y a des sièges disponibles
-            if flight.seats_available > 0:
+            if flight.sieges_disponible > 0:
                 # Créer une nouvelle réservation
                 serializer.save()
                 
                 # Mettre à jour le nombre de sièges disponibles
-                flight.seats_available -= 1
+                flight.sieges_disponible -= 1
                 flight.save()
                 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -1,4 +1,4 @@
-from django.urls import path, os
+from django.urls import path
 from .views import index, about, offers, seats, destinations, login, signup_view, signup_success
 
 urlpatterns = [

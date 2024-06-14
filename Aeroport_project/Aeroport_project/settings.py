@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'vols_depart_app',
     'staff_app',
     'paiement_app',
+    'frontend',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <title>Login | Ludiflex</title>
+</head>
+<body>
+    <nav>
+        <div class="nav__logo">Airline</div>
+    </nav>
+    <div class="login-box">
+        <div class="login-header">
+            <header>Login</header>
+        </div>
+        <form id="login-form">
+            {% csrf_token %}
+            <div class="input-box">
+                <input type="email" class="input-field" name="email" placeholder="Email" autocomplete="off" required>
+            </div>
+            <div class="input-box">
+                <input type="password" class="input-field" name="password" placeholder="Password" autocomplete="off" required>
+            </div>
+            <div class="forgot">
+                <section>
+                    <input type="checkbox" id="check" name="remember_me">
+                    <label for="check">Remember me</label>
+                </section>
+                <section>
+                    <a>Forgot password</a>
+                </section>
+            </div>
+            <div class="input-submit">
+                <button class="submit-btn" id="submit" type="submit">Sign In</button>
+            </div>
+        </form>
+        <div class="sign-up-link">
+            <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            async function handleSubmit(event) {
+                event.preventDefault();
+
+                const formData = new FormData(this);
+                const formDataObj = {};
+                formData.forEach((value, key) => (formDataObj[key] = value));
+
+                const csrftoken = getCookie('csrftoken');
+
+                try {
+                    const response = await fetch('/login/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify(formDataObj)
+                    });
+
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.indexOf('application/json') !== -1) {
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            window.location.href = "{% url 'login_success' %}";
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    } else {
+                        const text = await response.text();
+                        console.error('Error:', text);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            document.getElementById('login-form').addEventListener('submit', handleSubmit);
+        });
+    </script>
+</body>
+</html>

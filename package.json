@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "nats.ws": "^1.27.0"
+  }
+}

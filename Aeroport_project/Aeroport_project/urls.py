@@ -25,6 +25,5 @@ urlpatterns = [
     path('API-flight-departures/', include('vols_depart_app.urls')),
     path('API-staff/',include('staff_app.urls')),
     path('API-paiement/',include('paiement_app.urls')),
-    path('', include('frontend.urls')),
     path('api-auth/', include('rest_framework.urls'))
 ]

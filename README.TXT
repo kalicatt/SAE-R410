@@ -1,10 +1,8 @@
-- DEMARRER Aeroport_project
-- DEMARRER FRONTEND sur le port 8001
+- DEMARRER Aeroport_project : python manage.py runserver 8002
+- DEMARRER FRONTEND : python manage.py runserver
 
 - FAIRE sur Aeroport_project : py manage.py run_nats
 
-- FAIRE sur FRONTEND : py manage.py runnats
-
-- NE PAS OUBLIER DE LANCER LE SERVER NATS.EXE SINON IL NY A PAS DE COMMUNICATION XD
+- NE PAS OUBLIER DE LANCER LE SERVER NATS à l'aide du Dockerfile car il y a une conf de websocket.
 
 FAIRE LES COMMANDES SUR DAUTRES TERMINAUX SINON CA FONCTIONNE PAS LOL

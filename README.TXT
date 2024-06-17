@@ -8,6 +8,6 @@
 FAIRE LES COMMANDES SUR DAUTRES TERMINAUX SINON CA FONCTIONNE PAS LOL
 
 
-Ce qu'il fonctionne : inscription, connexion, session de connexion.
+Ce qu'il fonctionne : inscription, connexion, session de connexion, visualisation des vols arrivées et depart.
 
-Ce qui arrive : gestions des vols arrivées et depart.
+Ce qui arrive : gestions des vols et payement, réservation.

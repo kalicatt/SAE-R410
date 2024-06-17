@@ -9,3 +9,8 @@ class FlightDepartureListCreateView(generics.ListCreateAPIView):
 class FlightDepartureDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = FlightDeparture.objects.all()
     serializer_class = FlightDepartureSerializer
+
+
+class FlightDepartureCreateView(generics.CreateAPIView):
+    queryset = FlightDeparture.objects.all()
+    serializer_class = FlightDepartureSerializer

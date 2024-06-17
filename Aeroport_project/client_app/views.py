@@ -10,6 +10,7 @@ from .models import *
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework import permissions
+from django.contrib.auth.hashers import check_password
 
 
 class ClientApiView(APIView):
@@ -81,3 +82,18 @@ class ClientDetailApiView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
                 
     
+class AuthenticateApiView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            client = Clients.objects.get(email=email)
+        except Clients.DoesNotExist:
+            return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)
+
+        if client.mot_de_passe == password:
+            return Response({'authenticated': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)

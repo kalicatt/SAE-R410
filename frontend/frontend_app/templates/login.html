@@ -42,60 +42,62 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
+    <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("Document loaded");
+
+            let nc;
+
+            try {
+                // Connexion au serveur NATS
+                nc = await connect({ servers: "ws://localhost:9222" });
+
+                console.log("Connecté au serveur NATS");
+
+                nc.closed().then(() => {
+                    console.log("Connexion au serveur NATS fermée");
+                });
+
+            } catch (err) {
+                console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
             }
 
-            async function handleSubmit(event) {
+            document.getElementById('login-form').addEventListener('submit', async function(event) {
                 event.preventDefault();
-
+                const submitButton = document.getElementById('submit');
+                submitButton.disabled = true;
+    
                 const formData = new FormData(this);
-                const formDataObj = {};
-                formData.forEach((value, key) => (formDataObj[key] = value));
-
-                const csrftoken = getCookie('csrftoken');
-
-                try {
-                    const response = await fetch('/login/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': csrftoken
-                        },
-                        body: JSON.stringify(formDataObj)
-                    });
-
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.indexOf('application/json') !== -1) {
-                        const data = await response.json();
-                        if (data.status === 'success') {
-                            window.location.href = "{% url 'login_success' %}";
+                const data = {
+                    email: formData.get('email'),
+                    password: formData.get('password')
+                };
+    
+                // Send data to NATS
+                if (nc) {
+                    const sc = StringCodec();
+                    try {
+                        const response = await nc.request("login", sc.encode(JSON.stringify(data)), { timeout: 5000 });
+                        const responseData = JSON.parse(sc.decode(response.data));
+                        if (responseData.status === 'success') {
+                            // Stocker les informations de l'utilisateur dans la session
+                            sessionStorage.setItem('user', JSON.stringify({
+                                nom: responseData.nom,
+                                prenom: responseData.prenom
+                            }));
+                            window.location.href = "{% url 'index' %}";
                         } else {
-                            alert('Error: ' + data.message);
+                            alert('Error: ' + responseData.message);
                         }
-                    } else {
-                        const text = await response.text();
-                        console.error('Error:', text);
+                    } catch (err) {
+                        console.error('Error:', err);
                     }
-                } catch (error) {
-                    console.error('Error:', error);
                 }
-            }
-
-            document.getElementById('login-form').addEventListener('submit', handleSubmit);
+    
+                submitButton.disabled = false;
+            });
         });
     </script>
 </body>

@@ -36,7 +36,7 @@ python manage.py runserver 8002
 Ouvrez un autre terminal, naviguez jusqu'au répertoire du projet, puis exécutez :
 
 ```bash
-python manage.py runserver
+python manage.py runserver 8001
 ```
 ### Exécuter le listener NATS
 Ouvrez un troisième terminal, naviguez jusqu'au répertoire du projet, puis exécutez :

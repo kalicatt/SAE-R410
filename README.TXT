@@ -3,7 +3,8 @@
 
 - FAIRE sur Aeroport_project : py manage.py run_nats
 
-- NE PAS OUBLIER DE LANCER LE SERVER NATS à l'aide du Dockerfile car il y a une conf de websocket.
+- NE PAS OUBLIER DE LANCER LE SERVER NATS à l'aide du Dockerfile (ça peut ne pas fonctionner) car il y a une conf de websocket.
+-> si ça ne fonctionne pas, voir fichier "CMD-POUR-LANCER-SERVEUR".
 
 FAIRE LES COMMANDES SUR DAUTRES TERMINAUX SINON CA FONCTIONNE PAS LOL
 

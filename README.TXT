@@ -6,3 +6,8 @@
 - NE PAS OUBLIER DE LANCER LE SERVER NATS à l'aide du Dockerfile car il y a une conf de websocket.
 
 FAIRE LES COMMANDES SUR DAUTRES TERMINAUX SINON CA FONCTIONNE PAS LOL
+
+
+Ce qu'il fonctionne : inscription, connexion, session de connexion.
+
+Ce qui arrive : gestions des vols arrivées et depart.

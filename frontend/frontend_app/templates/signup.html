@@ -64,8 +64,29 @@
         </form>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("Document loaded");
+
+            let nc;
+
+            try {
+                // Connexion au serveur NATS
+                nc = await connect({ servers: "ws://localhost:9222" });
+
+                console.log("Connecté au serveur NATS");
+
+                nc.closed().then(() => {
+                    console.log("Connexion au serveur NATS fermée");
+                });
+
+            } catch (err) {
+                console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+            }
+
+            // Charger les pays depuis un fichier JSON
             fetch('{% static "data/countries.json" %}')
                 .then(response => response.json())
                 .then(data => {
@@ -99,13 +120,33 @@
                         .catch(error => console.error('Error loading cities:', error));
                 }
             });
-    
-            document.getElementById('signup-form').addEventListener('submit', function(event) {
+
+            document.getElementById('signup-form').addEventListener('submit', async function(event) {
                 event.preventDefault();
                 const submitButton = document.getElementById('submit');
                 submitButton.disabled = true;
     
                 const formData = new FormData(this);
+                const data = {
+                    nom: formData.get('nom'),
+                    prenom: formData.get('prenom'),
+                    email: formData.get('email'),
+                    mot_de_passe: formData.get('mot_de_passe'),
+                    telephone: formData.get('telephone'),
+                    adresse: formData.get('adresse'),
+                    ville: formData.get('ville'),
+                    code_postal: formData.get('code_postal'),
+                    pays: formData.get('pays'),
+                    date_naissance: formData.get('date_naissance'),
+                };
+    
+                // Send data to NATS
+                if (nc) {
+                    const sc = StringCodec();
+                    nc.publish('signup', sc.encode(JSON.stringify(data)));
+                    console.log(`Data sent to NATS: ${JSON.stringify(data)}`);
+                }
+    
                 fetch('/signup/', {
                     method: 'POST',
                     body: formData

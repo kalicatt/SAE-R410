@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 
@@ -29,24 +30,18 @@ def signup_view(request):
 def signup_success(request):
     return render(request, 'signup_success.html')
 
-@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         email = data.get('email')
         password = data.get('password')
 
-        # Logique pour vérifier l'email et le mot de passe
-        if email == "aze@hotmail.fr" and password == "azeaze":
-            user_info = {
-                'prenom': 'Prenom',  # Remplacez par le prénom réel de l'utilisateur
-                'nom': 'Nom'         # Remplacez par le nom réel de l'utilisateur
-            }
-            request.session['user'] = user_info
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
             return JsonResponse({'status': 'success'})
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid credentials'})
-
     return render(request, 'login.html')
 
 @login_required

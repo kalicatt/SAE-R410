@@ -6,6 +6,8 @@ class FlightArrival(models.Model):
     flight_number = models.CharField(max_length=50)
     arrival_time = models.DateTimeField()
     origin = models.CharField(max_length=100)
+    prix = models.FloatField()
+    sieges_disponible = models.IntegerField()
 
     def __str__(self):
         return self.flight_number

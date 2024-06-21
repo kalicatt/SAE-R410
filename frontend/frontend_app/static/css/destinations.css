@@ -1,0 +1,53 @@
+.flights__grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* Change this to 1fr for 1 flight per line */
+    gap: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+
+  .flight {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #e0f7fa; /* Bleu clair agréable pour le fond */
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Assurez-vous que la couleur du texte offre un bon contraste avec le fond bleu */
+  .flight td {
+    text-align: center;
+    padding: 5px;
+    border-right: 1px solid #ddd;
+    color: #333; /* Couleur du texte pour un bon contraste */
+  }
+
+  .flight td:last-child {
+    border-right: none; /* Remove the border from the last cell */
+  }
+
+  .flights_departure__header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 10px;
+    background-color: #007bff; /* Choisissez une couleur d'arrière-plan pour les titres */
+    color: #ffffff; /* Couleur du texte pour les titres */
+    border-radius: 5px;
+    margin-bottom: 10px;
+    margin-top: 30px; /* Ajoute un peu d'espace entre les titres et les premiers éléments de vol */
+  }
+
+    .flights_arrival__header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    padding: 10px;
+    background-color: #32b471; /* Choisissez une couleur d'arrière-plan pour les titres */
+    color: #ffffff; /* Couleur du texte pour les titres */
+    border-radius: 5px;
+    margin-bottom: 10px;
+    margin-top: 30px; /* Ajoute un peu d'espace entre les titres et les premiers éléments de vol */
+  }

@@ -1,54 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+    
 <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/signup_succes.css' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up Success</title>
-    <style>
-        /* Styles existants */
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #e6f7ff; /* Fond dans les tons bleus clairs */
-        }
-        
-        h1, p, a, .btn {
-            text-align: center;
-            animation: fadeIn 2s;
-        }
-        
-        /* Animation fade-in */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        #welcomeMessage {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            margin-top: 20px;
-            background-color: #007bff; /* Bleu */
-            color: white; /* Texte blanc */
-            border: none;
-            padding: 10px 20px;
-            text-decoration: none;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .btn:hover {
-            background-color: #0056b3; /* Bleu plus foncé au survol */
-        }
-    </style>
+    <title>Sign Up Success</title> 
 </head>
 <body>
     <h1>Sign Up Successful!</h1>

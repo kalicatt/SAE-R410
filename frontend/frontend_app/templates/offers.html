@@ -3,19 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="styles.css" />
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Web Design Mastery</title>
   </head>
   <body>
     <nav>
       <div class="nav__logo">Airline</div>
       <ul class="nav__links">
-        <li class="link"><a href="index.html">Home</a></li>
-        <li class="link"><a href="about.html">About</a></li>
-        <li class="link"><a href="offer.html">Offers</a></li>
-        <li class="link"><a href="seats.html">Seats</a></li>
-        <li class="link"><a href="destination.html">Destinations</a></li>
+        <li class="link"><a href="{% url 'index' %}">Home</a></li>
+        <li class="link"><a href="{% url 'about' %}">About</a></li>
+        <li class="link"><a href="{% url 'offers' %}">Offers</a></li>
+        <li class="link"><a href="{% url 'seats' %}">Seats</a></li>
+        <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
       </ul>
       <button class="btn" onclick="window.location.href='login.html'">Login</button>
 
@@ -23,7 +24,7 @@
     </nav>
     <header class="section__container header__container">
       <h1 class="section__header">Find And Book<br />A Great Experience</h1>
-      <img src="assets/header.jpg" alt="header" />
+      <img src="{% static 'images/header.jpg' %}" alt="header" />
     </header>
 
     <section class="section__container booking__container">
@@ -108,9 +109,9 @@
           </p>
         </div>
         <div class="plan__image">
-          <img src="assets/plan-1.jpg" alt="plan" />
-          <img src="assets/plan-2.jpg" alt="plan" />
-          <img src="assets/plan-3.jpg" alt="plan" />
+          <img src="{% static 'images/plan-1.jpg'%}" alt="plan" />
+          <img src="{% static 'images/plan-2.jpg'%}" alt="plan" />
+          <img src="{% static 'images/plan-3.jpg'%}" alt="plan" />
         </div>
       </div>
     </section>
@@ -154,8 +155,8 @@
 
     <section class="section__container lounge__container">
       <div class="lounge__image">
-        <img src="assets/lounge-1.jpg" alt="lounge" />
-        <img src="assets/lounge-2.jpg" alt="lounge" />
+        <img src="{% static 'images/lounge-1.jpg'%}" alt="lounge" />
+        <img src="{% static 'images/lounge-2.jpg'%}" alt="lounge" />
       </div>
       <div class="lounge__content">
         <h2 class="section__header">Unaccompanied Minor Lounge</h2>
@@ -196,33 +197,33 @@
       <h2 class="section__header">Best travellers of the month</h2>
       <div class="travellers__grid">
         <div class="travellers__card">
-          <img src="assets/traveller-1.jpg" alt="traveller" />
+          <img src="{% static 'images/traveller-1.jpg'%}" alt="traveller" />
           <div class="travellers__card__content">
-            <img src="assets/client-1.jpg" alt="client" />
+            <img src="{% static 'images/client-1.jpg'%}" alt="client" />
             <h4>Emily Johnson</h4>
             <p>Dubai</p>
           </div>
         </div>
         <div class="travellers__card">
-          <img src="assets/traveller-2.jpg" alt="traveller" />
+          <img src="{% static 'images/traveller-2.jpg'%}" alt="traveller" />
           <div class="travellers__card__content">
-            <img src="assets/client-2.jpg" alt="client" />
+            <img src="{% static 'images/client-2.jpg'%}" alt="client" />
             <h4>David Smith</h4>
             <p>Paris</p>
           </div>
         </div>
         <div class="travellers__card">
-          <img src="assets/traveller-3.jpg" alt="traveller" />
+          <img src="{% static 'images/traveller-3.jpg'%}" alt="traveller" />
           <div class="travellers__card__content">
-            <img src="assets/client-3.jpg" alt="client" />
+            <img src="{% static 'images/client-3.jpg'%}" alt="client" />
             <h4>Olivia Brown</h4>
             <p>Singapore</p>
           </div>
         </div>
         <div class="travellers__card">
-          <img src="assets/traveller-4.jpg" alt="traveller" />
+          <img src="{% static 'images/traveller-4.jpg'%}" alt="traveller" />
           <div class="travellers__card__content">
-            <img src="assets/client-4.jpg" alt="client" />
+            <img src="{% static 'images/client-4.jpg'%}" alt="client" />
             <h4>Daniel Taylor</h4>
             <p>Malaysia</p>
           </div>

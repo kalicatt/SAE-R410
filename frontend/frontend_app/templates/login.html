@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    <title>Login | Ludiflex</title>
+    <title>Connexion</title>
 </head>
 <body>
     <nav>
@@ -34,7 +34,7 @@
                 </section>
             </div>
             <div class="input-submit">
-                <button class="submit-btn" id="submit" type="submit" style="color: rgb(255, 255, 255);">Sign In</button>
+                <button class="submit-btn" id="submit" type="submit">Sign In</button>
             </div>
         </form>
         <div class="sign-up-link">
@@ -74,6 +74,8 @@
                     email: formData.get('email'),
                     password: formData.get('password')
                 };
+
+                console.log(data.email); // Affiche l'email dans la console
     
                 // Send data to NATS
                 if (nc) {
@@ -84,6 +86,7 @@
                         if (responseData.status === 'success') {
                             // Stocker les informations de l'utilisateur dans la session
                             sessionStorage.setItem('user', JSON.stringify({
+                                email: data.email,  // Stocker l'email de l'utilisateur
                                 nom: responseData.nom,
                                 prenom: responseData.prenom
                             }));

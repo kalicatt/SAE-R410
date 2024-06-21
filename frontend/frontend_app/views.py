@@ -80,10 +80,3 @@ def profile(request):
 
 
 
-class AdminDashboardView(View):
-    def get(self, request):
-        if request.user.is_authenticated and request.user.is_staff:
-            reservations = Reservation.objects.all()
-            return render(request, 'admin_dashboard.html', {'reservations': reservations})
-        else:
-            return JsonResponse({'message': 'Unauthorized'}, status=403)

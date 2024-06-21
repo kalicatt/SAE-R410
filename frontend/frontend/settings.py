@@ -86,7 +86,11 @@ DATABASES = {
     }
 }
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Utilisation de la base de données pour stocker les sessions
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # Mettez sur True en production pour HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

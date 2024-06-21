@@ -4,14 +4,28 @@ import json
 import requests
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
 
 def index(request):
     return render(request, 'index.html')
 
+def about(request):
+    return render(request, 'about.html')
+
+def offers(request):
+    return render(request, 'offers.html')
+
+def seats(request):
+    return render(request, 'seats.html')
+
 def destinations(request):
     return render(request, 'destinations.html')
 
+@ensure_csrf_cookie
 def signup_view(request):
     if request.method == 'POST':
         # Les données seront interceptées et envoyées à NATS par le middleware
@@ -21,7 +35,7 @@ def signup_view(request):
 def signup_success(request):
     return render(request, 'signup_success.html')
 
-@csrf_exempt
+@ensure_csrf_cookie
 def login_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -31,24 +45,32 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            request.session['user'] = {'prenom': user.first_name, 'nom': user.last_name, 'email': user.email}
+            request.session['user'] = {'email': email, 'prenom': user.first_name, 'nom': user.last_name}
+            logging.debug(f"User {email} logged in successfully.")
             return JsonResponse({'status': 'success'})
         else:
-            return JsonResponse({'status': 'error', 'message': 'Invalid credentials'})
+            logging.debug(f"Invalid login attempt for user {email}.")
+            return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=400)
     return render(request, 'login.html')
 
 @login_required
 def login_success(request):
     return render(request, 'login_success.html')
 
-@login_required
 def profile_view(request):
     user = request.session.get('user')
+    logging.debug(f"Accessing profile for user {user}")
     return render(request, 'profile.html', {'user': user})
 
+@csrf_exempt
+@login_required
 def logout_view(request):
-    logout(request)
-    return redirect('index')
+    if request.method == 'POST':
+        logging.debug(f"User {request.user.email} logging out.")
+        logout(request)
+        request.session.flush()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 def flight_detail(request, flight_id, flight_type):
     if flight_type == 'departure':

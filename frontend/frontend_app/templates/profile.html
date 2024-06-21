@@ -39,19 +39,10 @@
                 
                 if (user) {
                     userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                            <a href="{% url 'profile' %}">Profile</a>
-                                            <button id="logout-btn" class="btn">Logout</button>`;
+                                              <a href="{% url 'profile' %}">Profile</a>
+                                              <button id="logout-btn" class="btn">Logout</button>`;
                 } else {
                     userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
-                }
-
-                // Gestion du bouton logout
-                const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', function() {
-                        sessionStorage.removeItem('user');
-                        window.location.href = "{% url 'index' %}";  // Redirection vers index.html
-                    });
                 }
             });
         </script>
@@ -90,7 +81,7 @@
         </div>
       </footer>
 
-      <script type="module">
+    <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -180,6 +171,5 @@
             }
         });
     </script>
-    
 </body>
 </html>

@@ -4,6 +4,7 @@ from nats_client import run_login_signup
 from nats_departures import run_departures
 from nats_arrivals import run_arrivals
 from nats_reservation import run_reservations
+from nats_admin import run_check_admin
 
 async def shutdown(loop, signal=None):
     """
@@ -43,6 +44,7 @@ def run_nats_tasks():
         loop.create_task(run_departures()),
         loop.create_task(run_arrivals()),
         loop.create_task(run_reservations()),
+        loop.create_task(run_check_admin()),
     ]
 
     for sig in (signal.SIGINT, signal.SIGTERM):

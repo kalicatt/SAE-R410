@@ -6,6 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 import logging
+from django.views import View
+from asgiref.sync import sync_to_async
+from nats.aio.client import Client as NATS
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -13,14 +16,6 @@ logging.basicConfig(level=logging.DEBUG)
 def index(request):
     return render(request, 'index.html')
 
-def about(request):
-    return render(request, 'about.html')
-
-def offers(request):
-    return render(request, 'offers.html')
-
-def seats(request):
-    return render(request, 'seats.html')
 
 def destinations(request):
     return render(request, 'destinations.html')
@@ -62,16 +57,6 @@ def profile_view(request):
     logging.debug(f"Accessing profile for user {user}")
     return render(request, 'profile.html', {'user': user})
 
-@csrf_exempt
-@login_required
-def logout_view(request):
-    if request.method == 'POST':
-        logging.debug(f"User {request.user.email} logging out.")
-        logout(request)
-        request.session.flush()
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
 def flight_detail(request, flight_id, flight_type):
     if flight_type == 'departure':
         url = f'http://127.0.0.1:8002/API-depart/vol-depart/{flight_id}/'
@@ -86,3 +71,6 @@ def flight_detail(request, flight_id, flight_type):
         return render(request, 'flight_detail.html', {'flight': flight, 'flight_type': flight_type})
     else:
         raise Http404("Flight does not exist")
+    
+def admin_dashboard(request):
+    return render(request, 'admin_dashboard.html')

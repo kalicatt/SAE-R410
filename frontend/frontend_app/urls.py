@@ -1,5 +1,7 @@
 from django.urls import path
-from .views import index, destinations, signup_view, signup_success, login_view, login_success, profile_view, logout_view, flight_detail
+from .views import index, destinations, signup_view, signup_success, login_view, login_success, profile_view, flight_detail
+from .views import admin_dashboard
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', index, name='index'),
@@ -9,6 +11,7 @@ urlpatterns = [
     path('login/', login_view, name='login'),
     path('login/success/', login_success, name='login_success'),
     path('profile/', profile_view, name='profile'),
-    path('logout/', logout_view, name='logout'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('flights/<str:flight_type>/<int:flight_id>/', flight_detail, name='flight_detail'),
+    path('admin_dashboard/', admin_dashboard, name='admin_dashboard'),
 ]

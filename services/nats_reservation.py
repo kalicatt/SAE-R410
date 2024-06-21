@@ -2,6 +2,7 @@ import json
 import aiohttp
 import logging
 from nats.aio.client import Client as NATS
+import asyncio
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,7 +37,6 @@ async def create_reservation(user_email, flight_id):
         async with session.get(reservation_check_url) as reservation_check_response:
             if reservation_check_response.status == 200:
                 existing_reservations = await reservation_check_response.json()
-                # Filter to ensure the reservation exists for the correct client and flight
                 filtered_reservations = [res for res in existing_reservations if res['client'] == client['id'] and res['flight'] == flight['id']]
                 logging.debug(f"Filtered reservations for client {client['id']} and flight {flight['id']}: {filtered_reservations}")
                 if filtered_reservations:
@@ -139,22 +139,98 @@ async def cancel_reservation(reservation_id):
                 logging.error(f"Failed to delete reservation {reservation_id}")
                 return {'status': 'error', 'message': 'Failed to cancel reservation'}
 
+async def get_all_reservations():
+    async with aiohttp.ClientSession() as session:
+        reservations_url = 'http://127.0.0.1:8002/API-reservation/reservations/'
+        async with session.get(reservations_url) as reservations_response:
+            if reservations_response.status == 200:
+                reservations = await reservations_response.json()
+                for res in reservations:
+                    res['prix_ticket'] = str(res['prix_ticket'])  # Convert Decimal to string
+                    # Get client details
+                    client_url = f'http://127.0.0.1:8002/API-client/clients/{res["client"]}/'
+                    async with session.get(client_url) as client_response:
+                        if client_response.status == 200:
+                            client = await client_response.json()
+                            res['client_nom'] = client['nom']
+                            res['client_prenom'] = client['prenom']
+                    # Get flight details
+                    flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{res["flight"]}/'
+                    async with session.get(flight_url) as flight_response:
+                        if flight_response.status == 200:
+                            flight = await flight_response.json()
+                            res['flight_details'] = flight
+                logging.debug(f"Fetched all reservations: {reservations}")
+                return {'status': 'success', 'data': reservations}
+            else:
+                logging.error("Failed to fetch reservations")
+                return {'status': 'error', 'message': 'Failed to fetch reservations'}
+
+async def validate_reservation(reservation_id):
+    async with aiohttp.ClientSession() as session:
+        # Get reservation data
+        reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
+        async with session.get(reservation_url) as reservation_response:
+            if reservation_response.status != 200:
+                logging.error(f"Failed to fetch reservation data for id {reservation_id}")
+                return {'status': 'error', 'message': f'Reservation with id {reservation_id} does not exist'}
+            reservation = await reservation_response.json()
+
+        # Update reservation validation status
+        reservation['is_validated'] = True
+        async with session.put(reservation_url, json=reservation) as update_response:
+            if update_response.status == 200:
+                logging.debug(f"Reservation {reservation_id} validated successfully")
+                return {'status': 'success', 'message': 'Reservation validated successfully'}
+            else:
+                logging.error(f"Failed to validate reservation {reservation_id}")
+                return {'status': 'error', 'message': 'Failed to validate reservation'}
+
 async def run_reservations():
     nc = NATS()
-    await nc.connect(servers=["nats://localhost:4222"])
+
+    # Connect to the NATS server
+    try:
+        await nc.connect(servers=["nats://localhost:4222"])
+        logging.info("Connected to NATS server")
+    except Exception as e:
+        logging.error(f"Failed to connect to NATS server: {e}")
+        return
 
     async def message_handler(msg):
         subject = msg.subject
         reply = msg.reply
-        data = json.loads(msg.data.decode())
-        logging.debug(f"Received reservation request with data: {data}")
+        data = msg.data.decode()
+
+        # Log received data
+        logging.debug(f"Received message on subject '{subject}': {data}")
+
+        if not data:
+            logging.error("Received empty message")
+            if reply:
+                await nc.publish(reply, json.dumps({'status': 'error', 'message': 'Received empty message'}).encode())
+            return
+
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError as e:
+            logging.error(f"JSON decode error: {e}")
+            if reply:
+                await nc.publish(reply, json.dumps({'status': 'error', 'message': f'JSON decode error: {e}'}).encode())
+            return
+
+        logging.debug(f"Received request with data: {data}")
 
         if subject == "reserve_flight":
-            response = await create_reservation(data['user_email'], data['flight_id'])
+            response = await create_reservation(data.get('user_email'), data.get('flight_id'))
         elif subject == "get_reservations":
-            response = await get_user_reservations(data['user_email'])
+            response = await get_user_reservations(data.get('user_email'))
         elif subject == "cancel_reservation":
-            response = await cancel_reservation(data['reservation_id'])
+            response = await cancel_reservation(data.get('reservation_id'))
+        elif subject == "get_all_reservations":
+            response = await get_all_reservations()
+        elif subject == "validate_reservation":
+            response = await validate_reservation(data.get('reservation_id'))
         else:
             response = {'status': 'error', 'message': 'Unknown subject'}
 
@@ -162,10 +238,24 @@ async def run_reservations():
             await nc.publish(reply, json.dumps(response).encode())
             logging.debug(f"Published response: {response}")
 
-    await nc.subscribe("reserve_flight", cb=message_handler)
-    await nc.subscribe("get_reservations", cb=message_handler)
-    await nc.subscribe("cancel_reservation", cb=message_handler)
+    # Subscribe to the relevant subjects
+    subjects = ["reserve_flight", "get_reservations", "cancel_reservation", "get_all_reservations", "validate_reservation"]
+    for subject in subjects:
+        try:
+            await nc.subscribe(subject, cb=message_handler)
+            logging.info(f"Subscribed to subject '{subject}'")
+        except Exception as e:
+            logging.error(f"Failed to subscribe to subject '{subject}': {e}")
+
+    # Keep the connection alive
+    try:
+        while True:
+            await asyncio.sleep(1)
+    except KeyboardInterrupt:
+        logging.info("Received KeyboardInterrupt, closing connection")
+    finally:
+        await nc.close()
+        logging.info("NATS connection closed")
 
 if __name__ == "__main__":
-    import asyncio
     asyncio.run(run_reservations())

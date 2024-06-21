@@ -34,10 +34,13 @@ async def create_reservation(user_email, flight_id):
         # Check if reservation already exists
         reservation_check_url = f'http://127.0.0.1:8002/API-reservation/reservations/?client={client["id"]}&flight={flight["id"]}'
         async with session.get(reservation_check_url) as reservation_check_response:
-            existing_reservations = await reservation_check_response.json()
-            logging.debug(f"Existing reservations for client {client['id']} and flight {flight['id']}: {existing_reservations}")
-            if reservation_check_response.status == 200 and existing_reservations:
-                return {'status': 'error', 'message': 'You have already reserved this flight.'}
+            if reservation_check_response.status == 200:
+                existing_reservations = await reservation_check_response.json()
+                # Filter to ensure the reservation exists for the correct client and flight
+                filtered_reservations = [res for res in existing_reservations if res['client'] == client['id'] and res['flight'] == flight['id']]
+                logging.debug(f"Filtered reservations for client {client['id']} and flight {flight['id']}: {filtered_reservations}")
+                if filtered_reservations:
+                    return {'status': 'error', 'message': 'You have already reserved this flight.'}
 
         # Create reservation if seats are available
         if flight['sieges_disponible'] > 0:

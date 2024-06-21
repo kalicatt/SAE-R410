@@ -139,8 +139,18 @@
                                 <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
                                     ${reservation.is_validated ? 'Validée' : 'En attente'}
                                 </span></p>
+                                ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
                             `;
                             reservationsContainer.appendChild(reservationDiv);
+                        });
+
+                        // Ajouter les gestionnaires d'événements pour les boutons de paiement
+                        document.querySelectorAll('.pay-btn').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const reservationId = this.dataset.reservationId;
+                                alert(`Payer pour la réservation ID: ${reservationId}`);
+                                // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                            });
                         });
                     } else {
                         console.error('Failed to fetch reservations');

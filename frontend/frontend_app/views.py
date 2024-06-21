@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, Http404
-from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 import requests
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.conf import settings
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 
 def index(request):
     return render(request, 'index.html')
@@ -79,3 +77,13 @@ def flight_detail(request, flight_id, flight_type):
 @login_required
 def profile(request):
     return render(request, 'profile.html')
+
+
+
+class AdminDashboardView(View):
+    def get(self, request):
+        if request.user.is_authenticated and request.user.is_staff:
+            reservations = Reservation.objects.all()
+            return render(request, 'admin_dashboard.html', {'reservations': reservations})
+        else:
+            return JsonResponse({'message': 'Unauthorized'}, status=403)

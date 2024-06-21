@@ -13,11 +13,11 @@
     <nav>
       <div class="nav__logo">Airline</div>
       <ul class="nav__links">
-        <li class="link"><a href="index.html">Home</a></li>
-        <li class="link"><a href="about.html">About</a></li>
-        <li class="link"><a href="offer.html">Offers</a></li>
-        <li class="link"><a href="seats.html">Seats</a></li>
-        <li class="link"><a href="destination.html">Destinations</a></li>
+        <li class="link"><a href="{% url 'index' %}">Home</a></li>
+        <li class="link"><a href="{% url 'about' %}">About</a></li>
+        <li class="link"><a href="{% url 'offers' %}">Offers</a></li>
+        <li class="link"><a href="{% url 'seats' %}">Seats</a></li>
+        <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
       </ul>
       <button class="btn" onclick="window.location.href='login.html'">Login</button>
 

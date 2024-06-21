@@ -19,6 +19,8 @@ async def create_reservation(user_email, flight_id):
                 return {'status': 'error', 'message': f'Client with email {user_email} does not exist'}
             client = client_data[0]  # Get the first client in the list
 
+        logging.debug(f"Client data: {client}")
+
         # Get flight data by id
         flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{flight_id}/'
         async with session.get(flight_url) as flight_response:
@@ -27,10 +29,13 @@ async def create_reservation(user_email, flight_id):
                 return {'status': 'error', 'message': f'Flight with id {flight_id} does not exist'}
             flight = await flight_response.json()
 
+        logging.debug(f"Flight data: {flight}")
+
         # Check if reservation already exists
         reservation_check_url = f'http://127.0.0.1:8002/API-reservation/reservations/?client={client["id"]}&flight={flight["id"]}'
         async with session.get(reservation_check_url) as reservation_check_response:
             existing_reservations = await reservation_check_response.json()
+            logging.debug(f"Existing reservations for client {client['id']} and flight {flight['id']}: {existing_reservations}")
             if reservation_check_response.status == 200 and existing_reservations:
                 return {'status': 'error', 'message': 'You have already reserved this flight.'}
 
@@ -96,6 +101,8 @@ async def cancel_reservation(reservation_id):
                 logging.error(f"Failed to fetch reservation data for id {reservation_id}")
                 return {'status': 'error', 'message': f'Reservation with id {reservation_id} does not exist'}
             reservation = await reservation_response.json()
+
+        logging.debug(f"Reservation data: {reservation}")
 
         # Delete reservation
         async with session.delete(reservation_url) as delete_response:

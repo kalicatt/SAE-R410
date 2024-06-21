@@ -1,0 +1,28 @@
+http://127.0.0.1:8002/API-depart/vol-depart/
+
+{
+    "flight_number": "AF1234",
+    "departure_time": "2024-06-20",
+    "destination": "Paris",
+    "prix": "350.00",
+    "sieges_disponible": 150
+}
+
+
+{
+    "flight_number": "CF1232",
+    "departure_time": "2025-02-29",
+    "destination": "Berlin",
+    "prix": "1550.00",
+    "sieges_disponible": 2
+}
+
+
+http://127.0.0.1:8002/API-arriver/vol-arriver/
+
+
+{
+    "flight_number": "CF1232",
+    "arrival_time" : "2025-02-29",
+    "origin": "Tokyo"
+}

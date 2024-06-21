@@ -30,7 +30,8 @@ async def create_reservation(user_email, flight_id):
         # Check if reservation already exists
         reservation_check_url = f'http://127.0.0.1:8002/API-reservation/reservations/?client={client["id"]}&flight={flight["id"]}'
         async with session.get(reservation_check_url) as reservation_check_response:
-            if reservation_check_response.status == 200 and await reservation_check_response.json():
+            existing_reservations = await reservation_check_response.json()
+            if reservation_check_response.status == 200 and existing_reservations:
                 return {'status': 'error', 'message': 'You have already reserved this flight.'}
 
         # Create reservation if seats are available
@@ -69,17 +70,57 @@ async def get_user_reservations(user_email):
                 return {'status': 'error', 'message': f'Client with email {user_email} does not exist'}
             client = client_data[0]  # Get the first client in the list
 
+        logging.debug(f"Client data: {client}")
+
         # Get reservations by client id
         reservations_url = f'http://127.0.0.1:8002/API-reservation/reservations/?client={client["id"]}'
         async with session.get(reservations_url) as reservations_response:
             if reservations_response.status == 200:
                 reservations = await reservations_response.json()
-                for res in reservations:
+                # Filter reservations by client ID
+                client_reservations = [res for res in reservations if res['client'] == client['id']]
+                for res in client_reservations:
                     res['prix_ticket'] = str(res['prix_ticket'])  # Convert Decimal to string
-                return {'status': 'success', 'data': reservations}
+                logging.debug(f"Reservations for client {client['id']}: {client_reservations}")
+                return {'status': 'success', 'data': client_reservations}
             else:
                 logging.error("Failed to fetch reservations")
                 return {'status': 'error', 'message': 'Failed to fetch reservations'}
+
+async def cancel_reservation(reservation_id):
+    async with aiohttp.ClientSession() as session:
+        # Get reservation data
+        reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
+        async with session.get(reservation_url) as reservation_response:
+            if reservation_response.status != 200:
+                logging.error(f"Failed to fetch reservation data for id {reservation_id}")
+                return {'status': 'error', 'message': f'Reservation with id {reservation_id} does not exist'}
+            reservation = await reservation_response.json()
+
+        # Delete reservation
+        async with session.delete(reservation_url) as delete_response:
+            if delete_response.status == 204:
+                logging.debug(f"Reservation {reservation_id} deleted successfully")
+
+                # Update flight seat availability
+                flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{reservation["flight"]}/'
+                async with session.get(flight_url) as flight_response:
+                    if flight_response.status == 200:
+                        flight = await flight_response.json()
+                        flight['sieges_disponible'] += 1
+                        async with session.put(flight_url, json=flight) as update_response:
+                            if update_response.status == 200:
+                                logging.debug(f"Flight seat availability updated successfully for flight {reservation['flight']}")
+                                return {'status': 'success', 'message': 'Reservation cancelled successfully'}
+                            else:
+                                logging.error(f"Failed to update flight seat availability for flight {reservation['flight']}")
+                                return {'status': 'error', 'message': 'Failed to update flight seat availability'}
+                    else:
+                        logging.error(f"Failed to fetch flight data for id {reservation['flight']}")
+                        return {'status': 'error', 'message': f'Failed to fetch flight data for id {reservation["flight"]}'}
+            else:
+                logging.error(f"Failed to delete reservation {reservation_id}")
+                return {'status': 'error', 'message': 'Failed to cancel reservation'}
 
 async def run_reservations():
     nc = NATS()
@@ -95,6 +136,8 @@ async def run_reservations():
             response = await create_reservation(data['user_email'], data['flight_id'])
         elif subject == "get_reservations":
             response = await get_user_reservations(data['user_email'])
+        elif subject == "cancel_reservation":
+            response = await cancel_reservation(data['reservation_id'])
         else:
             response = {'status': 'error', 'message': 'Unknown subject'}
 
@@ -104,3 +147,8 @@ async def run_reservations():
 
     await nc.subscribe("reserve_flight", cb=message_handler)
     await nc.subscribe("get_reservations", cb=message_handler)
+    await nc.subscribe("cancel_reservation", cb=message_handler)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(run_reservations())

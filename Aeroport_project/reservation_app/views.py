@@ -25,11 +25,12 @@ class ReservationListAPIView(APIView):
             # Vérifier s'il y a des sièges disponibles
             if flight.sieges_disponible > 0:
                 # Vérifier si la réservation existe déjà
-                if Reservation.objects.filter(client=client, flight=flight).exists():
+                existing_reservations = Reservation.objects.filter(client=client, flight=flight)
+                if existing_reservations.exists():
                     return Response({"error": "You have already reserved this flight."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Créer une nouvelle réservation
-                serializer.save()
+                reservation = serializer.save()
 
                 # Mettre à jour le nombre de sièges disponibles
                 flight.sieges_disponible -= 1

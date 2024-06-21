@@ -39,10 +39,19 @@
                 
                 if (user) {
                     userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                              <a href="{% url 'profile' %}">Profile</a>
-                                              <button id="logout-btn" class="btn">Logout</button>`;
+                                            <a href="{% url 'profile' %}">Profile</a>
+                                            <button id="logout-btn" class="btn">Logout</button>`;
                 } else {
                     userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
+                }
+
+                // Gestion du bouton logout
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function() {
+                        sessionStorage.removeItem('user');
+                        window.location.href = "{% url 'index' %}";  // Redirection vers index.html
+                    });
                 }
             });
         </script>
@@ -67,9 +76,6 @@
           <div class="footer__col">
             <h4>INFORMATION</h4>
             <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'about' %}">About</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'offers' %}">Offers</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'seats' %}">Seats</a><br>
             <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
           </div>
           <div class="footer__col">
@@ -84,7 +90,7 @@
         </div>
       </footer>
 
-    <script type="module">
+      <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -125,6 +131,7 @@
                                     ${reservation.is_validated ? 'Validée' : 'En attente'}
                                 </span></p>
                                 ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
+                                <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
                             `;
                             reservationsContainer.appendChild(reservationDiv);
                         });
@@ -135,6 +142,24 @@
                                 const reservationId = this.dataset.reservationId;
                                 alert(`Payer pour la réservation ID: ${reservationId}`);
                                 // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                            });
+                        });
+
+                        // Ajouter les gestionnaires d'événements pour les boutons d'annulation
+                        document.querySelectorAll('.cancel-btn').forEach(button => {
+                            button.addEventListener('click', async function() {
+                                const reservationId = this.dataset.reservationId;
+                                const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
+                                if (confirmCancel) {
+                                    const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
+                                    const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
+                                    if (cancelResponseData.status === 'success') {
+                                        alert('Réservation annulée avec succès');
+                                        location.reload(); // Reload the page to update the UI
+                                    } else {
+                                        alert('Erreur lors de l\'annulation de la réservation: ' + cancelResponseData.message);
+                                    }
+                                }
                             });
                         });
                     } else {
@@ -155,5 +180,6 @@
             }
         });
     </script>
+    
 </body>
 </html>

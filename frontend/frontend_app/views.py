@@ -2,22 +2,12 @@ from django.shortcuts import render, redirect, Http404
 from django.http import JsonResponse
 import json
 import requests
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     return render(request, 'index.html')
-
-def about(request):
-    return render(request, 'about.html')
-
-def offers(request):
-    return render(request, 'offers.html')
-
-def seats(request):
-    return render(request, 'seats.html')
 
 def destinations(request):
     return render(request, 'destinations.html')
@@ -31,6 +21,7 @@ def signup_view(request):
 def signup_success(request):
     return render(request, 'signup_success.html')
 
+@csrf_exempt
 def login_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -40,6 +31,7 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
+            request.session['user'] = {'prenom': user.first_name, 'nom': user.last_name, 'email': user.email}
             return JsonResponse({'status': 'success'})
         else:
             return JsonResponse({'status': 'error', 'message': 'Invalid credentials'})
@@ -58,7 +50,6 @@ def logout_view(request):
     logout(request)
     return redirect('index')
 
-
 def flight_detail(request, flight_id, flight_type):
     if flight_type == 'departure':
         url = f'http://127.0.0.1:8002/API-depart/vol-depart/{flight_id}/'
@@ -73,10 +64,3 @@ def flight_detail(request, flight_id, flight_type):
         return render(request, 'flight_detail.html', {'flight': flight, 'flight_type': flight_type})
     else:
         raise Http404("Flight does not exist")
-    
-@login_required
-def profile(request):
-    return render(request, 'profile.html')
-
-
-

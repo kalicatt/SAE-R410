@@ -55,9 +55,6 @@
             <div class="footer__col">
                 <h4>INFORMATION</h4>
                 <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-                <a style="color: rgb(255, 255, 255);" href="{% url 'about' %}">About</a><br>
-                <a style="color: rgb(255, 255, 255);" href="{% url 'offers' %}">Offers</a><br>
-                <a style="color: rgb(255, 255, 255);" href="{% url 'seats' %}">Seats</a><br>
                 <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
               </div>
               <div class="footer__col">
@@ -72,236 +69,154 @@
             </div>
     </footer>
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {% load static %}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css">
-        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-        <link rel="stylesheet" href="{% static 'css/destinations.css' %}">
-        <title>Listes des Vols</title>
-    </head>
-    <body>
-        <nav>
-            <a class="nav__logo" href="{% url 'index' %}">Albert Airline</a>
-            <ul class="nav__links">
-                <li class="link"><a href="{% url 'index' %}">Home</a></li>
-                <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
-            </ul>
-            <div id="user-info"></div>
-        </nav>
-        <header class="section__container header__container">
-            <h1 class="section__header">Listes des Vols</h1>
-        </header>
+    <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
     
-        <section class="section__container flights__container">
-            <h2 class="section__header">Depart des Vols</h2>
-            <div class="flights_departure__header">
-              <div>Numéro de vol</div>
-              <div>Date de départ</div>
-              <div>Destination</div>
-              <div>Prix</div>
-              <div>Sieges</div>
-            </div>
-            <div id="departures" class="flights__grid"></div>
-        </section>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            const userInfoDiv = document.getElementById('user-info');
     
-        <section class="section__container flights__container">
-            <h2 class="section__header">Arriver des Vols</h2>
-            <div class="flights_arrival__header">
-              <div>Numéro de vol</div>
-              <div>Date de départ</div>
-              <div>Destination</div>
-            </div>
-            <div id="arrivals" class="flights__grid"></div>
-        </section>
+            if (user) {
+                userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
+                                          <a href="{% url 'profile' %}">Profile</a>
+                                          <button id="logout-btn" class="btn">Logout</button>`;
+            } else {
+                userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
+            }
     
-        <footer class="footer">
-            <div class="section__container footer__container">
-                <div class="footer__col">
-                    <h3>Albert Airline</h3>
-                    <p>
-                        Projet cree dans le cadre de la SAE devcloud.
-                    </p>
-                </div>
-                <div class="footer__col">
-                    <h4>INFORMATION</h4>
-                    <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-                    <a style="color: rgb(255, 255, 255);" href="{% url 'about' %}">About</a><br>
-                    <a style="color: rgb(255, 255, 255);" href="{% url 'offers' %}">Offers</a><br>
-                    <a style="color: rgb(255, 255, 255);" href="{% url 'seats' %}">Seats</a><br>
-                    <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
-                  </div>
-                  <div class="footer__col">
-                    <h4>CONTACT</h4>
-                      <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
-                      <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
-                      <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
-                  </div>
-                </div>
-                <div class="section__container footer__bar">
-                  <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
-                </div>
-        </footer>
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    sessionStorage.removeItem('user');
+                    location.reload();  // Reload the page to update the UI
+                });
+            }
     
-        <script type="module">
-            import { connect, StringCodec } from '{% static "js/nats.js" %}';
-        
-            document.addEventListener('DOMContentLoaded', async function() {
-                const user = JSON.parse(sessionStorage.getItem('user'));
-                const userInfoDiv = document.getElementById('user-info');
-        
-                if (user) {
-                    userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                              <a href="{% url 'profile' %}">Profile</a>
-                                              <button id="logout-btn" class="btn">Logout</button>`;
-                } else {
-                    userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
-                }
-        
-                const logoutBtn = document.getElementById('logout-btn');
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', function() {
-                        sessionStorage.removeItem('user');
-                        location.reload();  // Reload the page to update the UI
+            console.log("Document loaded");
+    
+            let nc;
+    
+            try {
+                nc = await connect({ servers: "ws://localhost:9222" });
+                console.log("Connecté au serveur NATS");
+    
+                nc.closed().then(() => {
+                    console.log("Connexion au serveur NATS fermée");
+                });
+    
+                const sc = StringCodec();
+                const pageSize = 5;
+    
+                // Fonction pour formater les dates
+                const formatDate = (dateString) => {
+                    const date = new Date(dateString);
+                    return date.toLocaleString();
+                };
+    
+                // Fonction pour afficher les vols
+                const renderFlights = (container, data, page, type) => {
+                    container.innerHTML = ''; // Clear the container before adding new flights
+                    const start = (page - 1) * pageSize;
+                    const end = start + pageSize;
+                    const flights = data.slice(start, end);
+    
+                    flights.forEach(flight => {
+                        const flightDiv = document.createElement('div');
+                        flightDiv.classList.add('flight');
+                        if (type === 'departure') {
+                            flightDiv.innerHTML = `
+                                <div class="flight__column"><a href="/flights/departure/${flight.id}/">${flight.flight_number}</a></div>
+                                <div class="flight__column">${formatDate(flight.departure_time)}</div>
+                                <div class="flight__column">${flight.destination}</div>
+                                <div class="flight__column">${flight.prix}</div>
+                                <div class="flight__column">${flight.sieges_disponible}</div>
+                            `;
+                        } else {
+                            flightDiv.innerHTML = `
+                                <div class="flight__column">${flight.flight_number}</div>
+                                <div class="flight__column">${formatDate(flight.arrival_time)}</div>
+                                <div class="flight__column">${flight.origin}</div>
+                            `;
+                        }
+                        container.appendChild(flightDiv);
                     });
-                }
-        
-                console.log("Document loaded");
-        
-                let nc;
-        
-                try {
-                    nc = await connect({ servers: "ws://localhost:9222" });
-                    console.log("Connecté au serveur NATS");
-        
-                    nc.closed().then(() => {
-                        console.log("Connexion au serveur NATS fermée");
-                    });
-        
-                    const sc = StringCodec();
-                    const pageSize = 5;
-        
-                    // Fonction pour formater les dates
-                    const formatDate = (dateString) => {
-                        const date = new Date(dateString);
-                        return date.toLocaleString();
-                    };
-        
-                    // Fonction pour afficher les vols
-                    const renderFlights = (container, data, page, type) => {
-                        container.innerHTML = ''; // Clear the container before adding new flights
-                        const start = (page - 1) * pageSize;
-                        const end = start + pageSize;
-                        const flights = data.slice(start, end);
-        
-                        flights.forEach(flight => {
-                            const flightDiv = document.createElement('div');
-                            flightDiv.classList.add('flight');
+    
+                    renderPagination(container, data.length, page, type);
+                };
+    
+                // Fonction pour afficher la pagination
+                const renderPagination = (container, totalItems, currentPage, type) => {
+                    const paginationContainer = document.createElement('div');
+                    paginationContainer.classList.add('pagination');
+                    container.appendChild(paginationContainer);
+    
+                    const totalPages = Math.ceil(totalItems / pageSize);
+    
+                    const createButton = (page, text) => {
+                        const button = document.createElement('button');
+                        button.classList.add('btn');
+                        button.innerHTML = text;
+                        button.addEventListener('click', async () => {
                             if (type === 'departure') {
-                                flightDiv.innerHTML = `
-                                    <div class="flight__column"><a href="/flights/departure/${flight.id}/">${flight.flight_number}</a></div>
-                                    <div class="flight__column">${formatDate(flight.departure_time)}</div>
-                                    <div class="flight__column">${flight.destination}</div>
-                                    <div class="flight__column">${flight.prix}</div>
-                                    <div class="flight__column">${flight.sieges_disponible}</div>
-                                `;
-                            } else {
-                                flightDiv.innerHTML = `
-                                    <div class="flight__column">${flight.flight_number}</div>
-                                    <div class="flight__column">${formatDate(flight.arrival_time)}</div>
-                                    <div class="flight__column">${flight.origin}</div>
-                                `;
-                            }
-                            container.appendChild(flightDiv);
-                        });
-        
-                        renderPagination(container, data.length, page, type);
-                    };
-        
-                    // Fonction pour afficher la pagination
-                    const renderPagination = (container, totalItems, currentPage, type) => {
-                        const paginationContainer = document.createElement('div');
-                        paginationContainer.classList.add('pagination');
-                        container.appendChild(paginationContainer);
-        
-                        const totalPages = Math.ceil(totalItems / pageSize);
-        
-                        const createButton = (page, text) => {
-                            const button = document.createElement('button');
-                            button.classList.add('btn');
-                            button.innerHTML = text;
-                            button.addEventListener('click', async () => {
-                                if (type === 'departure') {
-                                    const departuresResponse = await nc.request("get_departures", sc.encode(""), { timeout: 5000 });
-                                    const departuresData = JSON.parse(sc.decode(departuresResponse.data));
-                                    if (departuresData.status === 'success') {
-                                        renderFlights(container, departuresData.data, page, 'departure');
-                                    }
-                                } else {
-                                    const arrivalsResponse = await nc.request("get_arrivals", sc.encode(""), { timeout: 5000 });
-                                    const arrivalsData = JSON.parse(sc.decode(arrivalsResponse.data));
-                                    if (arrivalsData.status === 'success') {
-                                        renderFlights(container, arrivalsData.data, page, 'arrival');
-                                    }
+                                const departuresResponse = await nc.request("get_departures", sc.encode(""), { timeout: 5000 });
+                                const departuresData = JSON.parse(sc.decode(departuresResponse.data));
+                                if (departuresData.status === 'success') {
+                                    renderFlights(container, departuresData.data, page, 'departure');
                                 }
-                            });
-                            return button;
-                        };
-        
-                        if (currentPage > 1) {
-                            const prevButton = createButton(currentPage - 1, '<i class="ri-arrow-left-s-line"></i>');
-                            paginationContainer.appendChild(prevButton);
-                        }
-        
-                        for (let i = 1; i <= totalPages; i++) {
-                            const pageButton = createButton(i, i);
-                            if (i === currentPage) {
-                                pageButton.classList.add('active');
+                            } else {
+                                const arrivalsResponse = await nc.request("get_arrivals", sc.encode(""), { timeout: 5000 });
+                                const arrivalsData = JSON.parse(sc.decode(arrivalsResponse.data));
+                                if (arrivalsData.status === 'success') {
+                                    renderFlights(container, arrivalsData.data, page, 'arrival');
+                                }
                             }
-                            paginationContainer.appendChild(pageButton);
-                        }
-        
-                        if (currentPage < totalPages) {
-                            const nextButton = createButton(currentPage + 1, '<i class="ri-arrow-right-s-line"></i>');
-                            paginationContainer.appendChild(nextButton);
-                        }
+                        });
+                        return button;
                     };
-        
-                    let departuresData = { data: [] };
-                    let arrivalsData = { data: [] };
-        
-                    // Récupérer et afficher les départs
-                    const departuresResponse = await nc.request("get_departures", sc.encode(""), { timeout: 5000 });
-                    departuresData = JSON.parse(sc.decode(departuresResponse.data));
-        
-                    if (departuresData.status === 'success') {
-                        const departuresContainer = document.getElementById('departures');
-                        renderFlights(departuresContainer, departuresData.data, 1, 'departure');
+    
+                    if (currentPage > 1) {
+                        const prevButton = createButton(currentPage - 1, '<i class="ri-arrow-left-s-line"></i>');
+                        paginationContainer.appendChild(prevButton);
                     }
-        
-                    // Récupérer et afficher les arrivées
-                    const arrivalsResponse = await nc.request("get_arrivals", sc.encode(""), { timeout: 5000 });
-                    arrivalsData = JSON.parse(sc.decode(arrivalsResponse.data));
-        
-                    if (arrivalsData.status === 'success') {
-                        const arrivalsContainer = document.getElementById('arrivals');
-                        renderFlights(arrivalsContainer, arrivalsData.data, 1, 'arrival');
+    
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageButton = createButton(i, i);
+                        if (i === currentPage) {
+                            pageButton.classList.add('active');
+                        }
+                        paginationContainer.appendChild(pageButton);
                     }
-                } catch (err) {
-                    console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+    
+                    if (currentPage < totalPages) {
+                        const nextButton = createButton(currentPage + 1, '<i class="ri-arrow-right-s-line"></i>');
+                        paginationContainer.appendChild(nextButton);
+                    }
+                };
+    
+                let departuresData = { data: [] };
+                let arrivalsData = { data: [] };
+    
+                // Récupérer et afficher les départs
+                const departuresResponse = await nc.request("get_departures", sc.encode(""), { timeout: 5000 });
+                departuresData = JSON.parse(sc.decode(departuresResponse.data));
+    
+                if (departuresData.status === 'success') {
+                    const departuresContainer = document.getElementById('departures');
+                    renderFlights(departuresContainer, departuresData.data, 1, 'departure');
                 }
-            });
-        </script>
-        
-        
-        
-    </body>
-    </html>
     
+                // Récupérer et afficher les arrivées
+                const arrivalsResponse = await nc.request("get_arrivals", sc.encode(""), { timeout: 5000 });
+                arrivalsData = JSON.parse(sc.decode(arrivalsResponse.data));
     
-    
+                if (arrivalsData.status === 'success') {
+                    const arrivalsContainer = document.getElementById('arrivals');
+                    renderFlights(arrivalsContainer, arrivalsData.data, 1, 'arrival');
+                }
+            } catch (err) {
+                console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+            }
+        });
+    </script>
 </body>
 </html>

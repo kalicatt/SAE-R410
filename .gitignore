@@ -23,3 +23,7 @@ venv/
 ENV/
 env/
 venv.bak/
+
+# Ignore Django migrations
+*/migrations/*
+!*/migrations/__init__.py

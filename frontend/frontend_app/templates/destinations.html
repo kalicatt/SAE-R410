@@ -7,26 +7,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/destinations.css' %}">
-    <title>Flight List</title>
+    <title>Listes des Vols</title>
 </head>
 <body>
     <nav>
-        <div class="nav__logo">Airline</div>
+        <a class="nav__logo" href="{% url 'index' %}">Albert Airline</a>
         <ul class="nav__links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
-            <li class="link"><a href="{% url 'about' %}">About</a></li>
-            <li class="link"><a href="{% url 'offers' %}">Offers</a></li>
-            <li class="link"><a href="{% url 'seats' %}">Seats</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
         </ul>
         <div id="user-info"></div>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Flight List</h1>
+        <h1 class="section__header">Listes des Vols</h1>
     </header>
 
     <section class="section__container flights__container">
-        <h2 class="section__header">Departing Flights</h2>
+        <h2 class="section__header">Depart des Vols</h2>
         <div class="flights_departure__header">
           <div>Numéro de vol</div>
           <div>Date de départ</div>
@@ -38,7 +35,7 @@
     </section>
 
     <section class="section__container flights__container">
-        <h2 class="section__header">Arriving Flights</h2>
+        <h2 class="section__header">Arriver des Vols</h2>
         <div class="flights_arrival__header">
           <div>Numéro de vol</div>
           <div>Date de départ</div>
@@ -50,41 +47,29 @@
     <footer class="footer">
         <div class="section__container footer__container">
             <div class="footer__col">
-                <h3>Flivan</h3>
+                <h3>Albert Airline</h3>
                 <p>
-                    Where Excellence Takes Flight. With a strong commitment to customer
-                    satisfaction and a passion for air travel, Flivan Airlines offers
-                    exceptional service and seamless journeys.
-                </p>
-                <p>
-                    From friendly smiles to state-of-the-art aircraft, we connect the
-                    world, ensuring safe, comfortable, and unforgettable experiences.
+                    Projet cree dans le cadre de la SAE devcloud.
                 </p>
             </div>
             <div class="footer__col">
                 <h4>INFORMATION</h4>
-                <p>Home</p>
-                <p>About</p>
-                <p>Offers</p>
-                <p>Seats</p>
-                <p>Destinations</p>
-            </div>
-            <div class="footer__col">
+                <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'about' %}">About</a><br>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'offers' %}">Offers</a><br>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'seats' %}">Seats</a><br>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
+              </div>
+              <div class="footer__col">
                 <h4>CONTACT</h4>
-                <p>Support</p>
-                <p>Media</p>
-                <p>Socials</p>
+                  <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
+                  <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
+                  <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
+              </div>
             </div>
-        </div>
-        <div class="section__container footer__bar">
-            <p>Copyright © 4 Web Design Mastery. All rights reserved.</p>
-            <div class="socials">
-                <span><i class="ri-facebook-fill"></i></span>
-                <span><i class="ri-twitter-fill"></i></span>
-                <span><i class="ri-instagram-line"></i></span>
-                <span><i class="ri-youtube-fill"></i></span>
+            <div class="section__container footer__bar">
+              <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
             </div>
-        </div>
     </footer>
 
     <script type="module">

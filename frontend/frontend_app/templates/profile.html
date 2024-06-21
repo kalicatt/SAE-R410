@@ -82,95 +82,97 @@
         </div>
       </footer>
 
-    <script type="module">
-import { connect, StringCodec } from '{% static "js/nats.js" %}';
-
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log("Document loaded");
-
-    let nc;
-
-    try {
-        // Connexion au serveur NATS
-        nc = await connect({ servers: "ws://localhost:9222" });
-
-        console.log("Connecté au serveur NATS");
-
-        nc.closed().then(() => {
-            console.log("Connexion au serveur NATS fermée");
-        });
-
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        const reservationsContainer = document.getElementById('reservations');
-
-        if (user) {
-            const sc = StringCodec();
-            const requestData = { user_email: user.email };
-
-            // Envoyer la demande de récupération des réservations via NATS
-            const response = await nc.request("get_reservations", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
-            const responseData = JSON.parse(sc.decode(response.data));
-
-            if (responseData.status === 'success') {
-                responseData.data.forEach(reservation => {
-                    const reservationDiv = document.createElement('div');
-                    reservationDiv.classList.add('reservation');
-                    reservationDiv.innerHTML = `
-                        <p>Reservation ID: ${reservation.id}</p>
-                        <p>Flight: ${reservation.flight__flight_number}</p>
-                        <p>Prix Ticket: ${reservation.prix_ticket}</p>
-                        <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
-                            ${reservation.is_validated ? 'Validée' : 'En attente'}
-                        </span></p>
-                        ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
-                        <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
-                    `;
-                    reservationsContainer.appendChild(reservationDiv);
+      <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
+    
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log("Document loaded");
+    
+            let nc;
+    
+            try {
+                // Connexion au serveur NATS
+                nc = await connect({ servers: "ws://localhost:9222" });
+    
+                console.log("Connecté au serveur NATS");
+    
+                nc.closed().then(() => {
+                    console.log("Connexion au serveur NATS fermée");
                 });
-
-                // Ajouter les gestionnaires d'événements pour les boutons de paiement
-                document.querySelectorAll('.pay-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const reservationId = this.dataset.reservationId;
-                        alert(`Payer pour la réservation ID: ${reservationId}`);
-                        // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+    
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const reservationsContainer = document.getElementById('reservations');
+    
+                if (user) {
+                    const sc = StringCodec();
+                    const requestData = { user_email: user.email };
+    
+                    // Envoyer la demande de récupération des réservations via NATS
+                    const response = await nc.request("get_reservations", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
+                    const responseData = JSON.parse(sc.decode(response.data));
+    
+                    if (responseData.status === 'success') {
+                        responseData.data.forEach(reservation => {
+                            const reservationDiv = document.createElement('div');
+                            reservationDiv.classList.add('reservation');
+                            reservationDiv.innerHTML = `
+                                <p>Reservation ID: ${reservation.id}</p>
+                                <p>Flight: ${reservation.flight_details.flight_number}</p>
+                                <p>Destination: ${reservation.flight_details.destination}</p>
+                                <p>Prix Ticket: ${reservation.prix_ticket}</p>
+                                <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
+                                    ${reservation.is_validated ? 'Validée' : 'En attente'}
+                                </span></p>
+                                ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
+                                <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
+                            `;
+                            reservationsContainer.appendChild(reservationDiv);
+                        });
+    
+                        // Ajouter les gestionnaires d'événements pour les boutons de paiement
+                        document.querySelectorAll('.pay-btn').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const reservationId = this.dataset.reservationId;
+                                alert(`Payer pour la réservation ID: ${reservationId}`);
+                                // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                            });
+                        });
+    
+                        // Ajouter les gestionnaires d'événements pour les boutons d'annulation
+                        document.querySelectorAll('.cancel-btn').forEach(button => {
+                            button.addEventListener('click', async function() {
+                                const reservationId = this.dataset.reservationId;
+                                const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
+                                if (confirmCancel) {
+                                    const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
+                                    const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
+                                    if (cancelResponseData.status === 'success') {
+                                        alert('Réservation annulée avec succès');
+                                        location.reload(); // Reload the page to update the UI
+                                    } else {
+                                        alert('Erreur lors de l\'annulation de la réservation: ' + cancelResponseData.message);
+                                    }
+                                }
+                            });
+                        });
+                    } else {
+                        console.error('Failed to fetch reservations');
+                    }
+                }
+    
+                // Gestion du bouton logout
+                const logoutBtn = document.getElementById('logout-btn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function() {
+                        sessionStorage.removeItem('user');
+                        location.reload();  // Reload the page to update the UI
                     });
-                });
-
-                // Ajouter les gestionnaires d'événements pour les boutons d'annulation
-                document.querySelectorAll('.cancel-btn').forEach(button => {
-                    button.addEventListener('click', async function() {
-                        const reservationId = this.dataset.reservationId;
-                        const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
-                        if (confirmCancel) {
-                            const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
-                            const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
-                            if (cancelResponseData.status === 'success') {
-                                alert('Réservation annulée avec succès');
-                                location.reload(); // Reload the page to update the UI
-                            } else {
-                                alert('Erreur lors de l\'annulation de la réservation: ' + cancelResponseData.message);
-                            }
-                        }
-                    });
-                });
-            } else {
-                console.error('Failed to fetch reservations');
+                }
+            } catch (err) {
+                console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
             }
-        }
-
-        // Gestion du bouton logout
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
-                sessionStorage.removeItem('user');
-                location.reload();  // Reload the page to update the UI
-            });
-        }
-    } catch (err) {
-        console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
-    }
-});
+        });
     </script>
+    
 </body>
 </html>

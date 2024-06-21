@@ -85,10 +85,17 @@ async def get_user_reservations(user_email):
         async with session.get(reservations_url) as reservations_response:
             if reservations_response.status == 200:
                 reservations = await reservations_response.json()
-                # Filter reservations by client ID
-                client_reservations = [res for res in reservations if res['client'] == client['id']]
-                for res in client_reservations:
-                    res['prix_ticket'] = str(res['prix_ticket'])  # Convert Decimal to string
+                client_reservations = []
+                for res in reservations:
+                    if res['client'] == client['id']:
+                        res['prix_ticket'] = str(res['prix_ticket'])  # Convert Decimal to string
+                        # Get flight details
+                        flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{res["flight"]}/'
+                        async with session.get(flight_url) as flight_response:
+                            if flight_response.status == 200:
+                                flight = await flight_response.json()
+                                res['flight_details'] = flight
+                        client_reservations.append(res)
                 logging.debug(f"Reservations for client {client['id']}: {client_reservations}")
                 return {'status': 'success', 'data': client_reservations}
             else:

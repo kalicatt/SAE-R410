@@ -154,7 +154,7 @@
                         const flightDiv = document.createElement('div');
                         flightDiv.classList.add('flight');
                         flightDiv.innerHTML = `
-                            <div class="flight__column"><a href="/flights/arrival/${arrival.id}/">${arrival.flight_number}</a></div>
+                            <div class="flight__column">${arrival.flight_number}</div>
                             <div class="flight__column">${arrival.arrival_time}</div>
                             <div class="flight__column">${arrival.origin}</div>
                         `;
@@ -167,6 +167,7 @@
             }
         });
     </script>
+    
     
 </body>
 </html>

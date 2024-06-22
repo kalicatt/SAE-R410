@@ -59,8 +59,6 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
-/* Ensure the nav bar is centered and items are properly aligned */
-/* Ensure the nav bar is centered and items are properly aligned */
 nav {
   max-width: var(--max-width);
   margin: auto;
@@ -75,7 +73,7 @@ nav {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-dark);
-  margin-right: auto; /* Push the logo to the left */
+  margin-right: 30px;
 }
 
 .nav__links {

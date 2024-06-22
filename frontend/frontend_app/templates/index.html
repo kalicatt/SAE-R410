@@ -11,11 +11,11 @@
 </head>
 <body>
     <nav>
-        <a class="nav__logo" href="{% url 'index' %}">Albert Airlines</a>
+      <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;">Albert Airlines</a>
         <ul class="nav__links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
-            <li class="link"><a href="{% url 'reservations' %}">Vos réservations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
             <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
         </ul>
         <div class="nav__user" id="user-info"></div>
@@ -28,7 +28,7 @@
                 const adminLink = document.getElementById('admin-link');
 
                 if (user) {
-                    userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
+                    userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
                                               <a href="{% url 'profile' %}" class="profile-link">Profile</a>
                                               <button id="logout-btn" class="btn">Logout</button>`;
                     
@@ -76,7 +76,7 @@
         </script>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Trouver et Reserver<br />Une formidable Experience</h1>
+        <h1 class="section__header">Trouver et Réserver<br />Une formidable Expérience</h1>
         <img src="{% static 'images/header.jpg' %}" alt="header" />
     </header>
 

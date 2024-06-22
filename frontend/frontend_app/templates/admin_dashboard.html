@@ -26,7 +26,7 @@
 </head>
 <body>
     <nav>
-        <a class="nav__logo" href="{% url 'index' %}">Albert Airline</a>
+        <a class="nav__logo" href="{% url 'index' %}">Albert Airlines</a>
         <ul class="nav__links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
@@ -242,5 +242,30 @@
             }
         });
     </script>
+
+<footer class="footer">
+    <div class="section__container footer__container" style="padding-top:30px; padding-bottom: 35px;">
+        <div class="footer__col">
+            <h3>Albert Airline</h3>
+            <p>
+                Projet cree dans le cadre de la SAE devcloud.
+            </p>
+        </div>
+        <div class="footer__col">
+            <h4>INFORMATION</h4>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
+          </div>
+          <div class="footer__col">
+            <h4>CONTACT</h4>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
+          </div>
+        </div>
+        <div class="section__container footer__bar">
+          <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
+        </div>
+</footer>
 </body>
 </html>

@@ -502,41 +502,39 @@ nav {
 
 .footer {
   background-color: var(--primary-color);
+
 }
 
 .footer__container {
   display: grid;
   grid-template-columns: 2fr repeat(2, 1fr);
-  gap: 5rem;
+  gap: 2rem; /* Réduire l'espace entre les colonnes */
 }
 
-.footer__col h3 {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: var(--white);
-  margin-bottom: 1rem;
-}
-
+.footer__col h3,
 .footer__col h4 {
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* Réduire la taille de la police */
   font-weight: 500;
   color: var(--white);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Réduire l'espace en bas */
 }
 
-.footer__col p {
+.footer__col p,
+.footer__col a {
   color: var(--extra-light);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Réduire l'espace en bas */
   cursor: pointer;
   transition: 0.3s;
+  font-size: 0.9rem; /* Réduire la taille de la police */
 }
 
-.footer__col p:hover {
+.footer__col p:hover,
+.footer__col a:hover {
   color: var(--white);
 }
 
 .footer__bar {
-  padding: 0.5rem;
+  padding: 0.5rem 0; /* Réduire la hauteur en ajustant le padding */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -545,7 +543,18 @@ nav {
 }
 
 .footer__bar p {
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Réduire la taille de la police */
+  color: var(--extra-light);
+}
+
+.socials {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Réduire l'espace entre les icônes */
+}
+
+.socials span {
+  font-size: 1rem; /* Réduire la taille de la police */
   color: var(--extra-light);
 }
 

@@ -7,7 +7,7 @@
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Profile</title>
+    <title>Vos Réservations</title>
     <style>
         .reservations {
             margin-top: 20px;
@@ -22,6 +22,12 @@
         }
         .pending {
             color: orange;
+        }
+        .no-reservations {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #333;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -99,6 +105,7 @@
     <section class="section__container reservations__container">
         <h2>Vos réservations</h2>
         <div id="reservations" class="reservations"></div>
+        <div id="no-reservations" class="no-reservations" style="display: none;">Vous n'avez pas de réservations actuellement</div>
     </section>
 
     <footer class="footer">
@@ -146,6 +153,7 @@
 
                 const user = JSON.parse(sessionStorage.getItem('user'));
                 const reservationsContainer = document.getElementById('reservations');
+                const noReservationsDiv = document.getElementById('no-reservations');
 
                 if (user) {
                     const sc = StringCodec();
@@ -156,49 +164,53 @@
                     const responseData = JSON.parse(sc.decode(response.data));
 
                     if (responseData.status === 'success') {
-                        responseData.data.forEach(reservation => {
-                            const reservationDiv = document.createElement('div');
-                            reservationDiv.classList.add('reservation');
-                            reservationDiv.innerHTML = `
-                                <p>Reservation ID: ${reservation.id}</p>
-                                <p>Flight: ${reservation.flight_details.flight_number}</p>
-                                <p>Destination: ${reservation.flight_details.destination}</p>
-                                <p>Prix Ticket: ${reservation.prix_ticket}</p>
-                                <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
-                                    ${reservation.is_validated ? 'Validée' : 'En attente'}
-                                </span></p>
-                                ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
-                                <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
-                            `;
-                            reservationsContainer.appendChild(reservationDiv);
-                        });
-
-                        // Ajouter les gestionnaires d'événements pour les boutons de paiement
-                        document.querySelectorAll('.pay-btn').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const reservationId = this.dataset.reservationId;
-                                alert(`Payer pour la réservation ID: ${reservationId}`);
-                                // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                        if (responseData.data.length === 0) {
+                            noReservationsDiv.style.display = 'block';
+                        } else {
+                            responseData.data.forEach(reservation => {
+                                const reservationDiv = document.createElement('div');
+                                reservationDiv.classList.add('reservation');
+                                reservationDiv.innerHTML = `
+                                    <p>Reservation ID: ${reservation.id}</p>
+                                    <p>Flight: ${reservation.flight_details.flight_number}</p>
+                                    <p>Destination: ${reservation.flight_details.destination}</p>
+                                    <p>Prix Ticket: ${reservation.prix_ticket}</p>
+                                    <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
+                                        ${reservation.is_validated ? 'Validée' : 'En attente'}
+                                    </span></p>
+                                    ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
+                                    <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
+                                `;
+                                reservationsContainer.appendChild(reservationDiv);
                             });
-                        });
 
-                        // Ajouter les gestionnaires d'événements pour les boutons d'annulation
-                        document.querySelectorAll('.cancel-btn').forEach(button => {
-                            button.addEventListener('click', async function() {
-                                const reservationId = this.dataset.reservationId;
-                                const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
-                                if (confirmCancel) {
-                                    const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
-                                    const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
-                                    if (cancelResponseData.status === 'success') {
-                                        alert('Réservation annulée avec succès');
-                                        location.reload(); // Reload the page to update the UI
-                                    } else {
-                                        alert('Erreur lors de l\'annulation de la réservation: ' + cancelResponseData.message);
+                            // Ajouter les gestionnaires d'événements pour les boutons de paiement
+                            document.querySelectorAll('.pay-btn').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const reservationId = this.dataset.reservationId;
+                                    alert(`Payer pour la réservation ID: ${reservationId}`);
+                                    // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                                });
+                            });
+
+                            // Ajouter les gestionnaires d'événements pour les boutons d'annulation
+                            document.querySelectorAll('.cancel-btn').forEach(button => {
+                                button.addEventListener('click', async function() {
+                                    const reservationId = this.dataset.reservationId;
+                                    const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
+                                    if (confirmCancel) {
+                                        const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
+                                        const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
+                                        if (cancelResponseData.status === 'success') {
+                                            alert('Réservation annulée avec succès');
+                                            location.reload(); // Reload the page to update the UI
+                                        } else {
+                                            alert('Erreur lors de l\'annulation de la réservation: ' + cancelResponseData.message);
+                                        }
                                     }
-                                }
+                                });
                             });
-                        });
+                        }
                     } else {
                         console.error('Failed to fetch reservations');
                     }

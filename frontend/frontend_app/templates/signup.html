@@ -27,6 +27,7 @@
             </div>
             <div class="input-box">
                 <input type="email" name="email" class="input-field" placeholder="Email" autocomplete="off" required>
+                <span id="email-error" style="color:red; display:none;">Cette adresse email est déjà utilisée.</span>
             </div>
             <div class="input-box">
                 <input type="password" name="mot_de_passe" class="input-field" placeholder="Password" autocomplete="off" required>
@@ -66,12 +67,21 @@
     </div>
 
     <script type="module">
+        /**
+         * Script d'inscription utilisateur avec validation d'unicité de l'adresse email
+         * et communication avec le serveur NATS.
+         *
+         * Ce script gère le processus d'inscription d'un utilisateur, y compris la validation
+         * de l'unicité de l'adresse email avant de soumettre le formulaire. Il communique également
+         * avec le serveur NATS pour envoyer les données d'inscription.
+         */
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
         document.addEventListener('DOMContentLoaded', async function() {
             console.log("Document loaded");
 
             let nc;
+            const sc = StringCodec();
 
             try {
                 // Connexion au serveur NATS
@@ -122,16 +132,33 @@
                 }
             });
 
+            document.querySelector('input[name="email"]').addEventListener('blur', async function() {
+                const email = this.value;
+                const emailError = document.getElementById('email-error');
+                
+                if (nc) {
+                    const reply = await nc.request('verify_email', sc.encode(JSON.stringify({ email })));
+                    const response = JSON.parse(sc.decode(reply.data));
+                    
+                    if (!response.is_unique) {
+                        emailError.style.display = 'inline';
+                    } else {
+                        emailError.style.display = 'none';
+                    }
+                }
+            });
+
             document.getElementById('signup-form').addEventListener('submit', async function(event) {
                 event.preventDefault();
                 const submitButton = document.getElementById('submit');
                 submitButton.disabled = true;
     
                 const formData = new FormData(this);
+                const email = formData.get('email');
                 const data = {
                     nom: formData.get('nom'),
                     prenom: formData.get('prenom'),
-                    email: formData.get('email'),
+                    email: email,
                     mot_de_passe: formData.get('mot_de_passe'),
                     telephone: formData.get('telephone'),
                     adresse: formData.get('adresse'),
@@ -140,10 +167,21 @@
                     pays: formData.get('pays'),
                     date_naissance: formData.get('date_naissance'),
                 };
+
+                // Validate email uniqueness
+                if (nc) {
+                    const reply = await nc.request('verify_email', sc.encode(JSON.stringify({ email })));
+                    const response = JSON.parse(sc.decode(reply.data));
+                    
+                    if (!response.is_unique) {
+                        alert('Cette adresse email est déjà utilisée.');
+                        submitButton.disabled = false;
+                        return;
+                    }
+                }
     
                 // Send data to NATS
                 if (nc) {
-                    const sc = StringCodec();
                     nc.publish('signup', sc.encode(JSON.stringify(data)));
                     console.log(`Data sent to NATS: ${JSON.stringify(data)}`);
                 }

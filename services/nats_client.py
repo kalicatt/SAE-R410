@@ -115,9 +115,23 @@ async def authenticate_user(data):
             return {'status': 'success', 'nom': client['nom'], 'prenom': client['prenom']}
     return {'status': 'error', 'message': 'Invalid credentials'}
 
+async def verify_email(email):
+    """
+    Vérifie si un email est unique.
+
+    Args:
+        email (str): L'email à vérifier.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et l'information de l'unicité de l'email.
+    """
+    logging.debug(f"Vérification de l'unicité de l'email : {email}")
+    exists = await check_client_exists(email)
+    return {'status': 'success', 'is_unique': not exists}
+
 async def run_login_signup():
     """
-    Exécute le processus de connexion et d'inscription via NATS.
+    Exécute le processus de connexion, d'inscription et de vérification d'email via NATS.
     """
     nc = NATS()
     await nc.connect(servers=["nats://localhost:4222"])
@@ -132,6 +146,8 @@ async def run_login_signup():
             response = await save_client_data(data)
         elif subject == "login":
             response = await authenticate_user(data)
+        elif subject == "verify_email":
+            response = await verify_email(data.get('email'))
         else:
             response = {'status': 'error', 'message': 'Sujet inconnu'}
         if reply:
@@ -140,7 +156,8 @@ async def run_login_signup():
 
     await nc.subscribe("signup", cb=message_handler)
     await nc.subscribe("login", cb=message_handler)
-    logging.debug("Abonné aux sujets 'signup' et 'login'")
+    await nc.subscribe("verify_email", cb=message_handler)
+    logging.debug("Abonné aux sujets 'signup', 'login' et 'verify_email'")
 
 if __name__ == "__main__":
     asyncio.run(run_login_signup())

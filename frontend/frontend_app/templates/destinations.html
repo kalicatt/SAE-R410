@@ -16,6 +16,8 @@
         <ul class="nav__links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Vos réservations</a></li>
+            <li class="link" id="admin-link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
         </ul>
         <div id="user-info"></div>
     </nav>
@@ -70,9 +72,10 @@
             </div>
     </footer>
 
+    <!-- Existing script for flights and pagination -->
     <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
-    
+
         document.addEventListener('DOMContentLoaded', async function() {
             const user = JSON.parse(sessionStorage.getItem('user'));
             const userInfoDiv = document.getElementById('user-info');
@@ -216,6 +219,63 @@
                 }
             } catch (err) {
                 console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+            }
+        });
+    </script>
+
+    <!-- Additional script for user info and admin check -->
+    <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            const userInfoDiv = document.getElementById('user-info');
+            const adminLink = document.getElementById('admin-link');
+
+            if (user) {
+                userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
+                                          <a href="{% url 'profile' %}">Profile</a>
+                                          <button id="logout-btn" class="btn">Logout</button>`;
+                
+                try {
+                    // Connexion au serveur NATS
+                    const nc = await connect({ servers: "ws://localhost:9222" });
+                    const sc = StringCodec();
+                    const requestData = { user_email: user.email };
+                    
+                    // Envoyer la demande de vérification d'admin via NATS
+                    const response = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
+                    const responseData = JSON.parse(sc.decode(response.data));
+                    console.log(responseData);
+                    
+                    if (responseData.status === 'success' && responseData.is_admin) {
+                        adminLink.style.display = 'block';
+                        console.log('User is admin');
+                    } else {
+                        console.log('User is not admin');
+                    }
+                } catch (err) {
+                    console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+                }
+
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    fetch("{% url 'logout' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/json"
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            sessionStorage.removeItem('user');
+                            window.location.href = "{% url 'index' %}";
+                        } else {
+                            alert("Failed to logout");
+                        }
+                    });
+                });
+            } else {
+                userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
             }
         });
     </script>

@@ -1,11 +1,12 @@
+# reservation_app/views.py
+
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Reservation
 from .serializers import ReservationSerializer
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
@@ -30,7 +31,7 @@ class ReservationListAPIView(APIView):
                     return Response({"error": "You have already reserved this flight."}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Créer une nouvelle réservation
-                reservation = serializer.save()
+                reservation = serializer.save(client_email=client.email)
 
                 # Mettre à jour le nombre de sièges disponibles
                 flight.sieges_disponible -= 1

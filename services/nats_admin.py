@@ -5,7 +5,7 @@ from nats.aio.client import Client as NATS
 import asyncio
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname=s - %(message)s')
 
 async def check_admin_status(user_email):
     async with aiohttp.ClientSession() as session:
@@ -26,6 +26,26 @@ async def check_admin_status(user_email):
                 return {'status': 'success', 'is_admin': True}
             else:
                 return {'status': 'success', 'is_admin': False}
+
+async def get_all_reservations():
+    async with aiohttp.ClientSession() as session:
+        reservations_url = 'http://127.0.0.1:8002/API-reservation/reservations/'
+        async with session.get(reservations_url) as reservations_response:
+            if reservations_response.status == 200:
+                reservations = await reservations_response.json()
+                for res in reservations:
+                    res['prix_ticket'] = str(res['prix_ticket'])  # Convert Decimal to string
+                    # Get flight details
+                    flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{res["flight"]}/'
+                    async with session.get(flight_url) as flight_response:
+                        if flight_response.status == 200:
+                            flight = await flight_response.json()
+                            res['flight_details'] = flight
+                logging.debug(f"Fetched all reservations: {reservations}")
+                return {'status': 'success', 'data': reservations}
+            else:
+                logging.error("Failed to fetch reservations")
+                return {'status': 'error', 'message': 'Failed to fetch reservations'}
 
 async def run_check_admin():
     nc = NATS()
@@ -59,6 +79,8 @@ async def run_check_admin():
 
         if subject == "check_admin":
             response = await check_admin_status(data.get('user_email'))
+        elif subject == "get_all_reservations":
+            response = await get_all_reservations()
         else:
             response = {'status': 'error', 'message': 'Unknown subject'}
 
@@ -66,12 +88,14 @@ async def run_check_admin():
             await nc.publish(reply, json.dumps(response).encode())
             logging.debug(f"Published response: {response}")
 
-    # Subscribe to the 'check_admin' subject
+    # Subscribe to the 'check_admin' and 'get_all_reservations' subjects
     try:
         await nc.subscribe("check_admin", cb=message_handler)
         logging.info("Subscribed to 'check_admin' subject")
+        await nc.subscribe("get_all_reservations", cb=message_handler)
+        logging.info("Subscribed to 'get_all_reservations' subject")
     except Exception as e:
-        logging.error(f"Failed to subscribe to 'check_admin': {e}")
+        logging.error(f"Failed to subscribe to subjects: {e}")
 
     # Keep the connection alive
     try:

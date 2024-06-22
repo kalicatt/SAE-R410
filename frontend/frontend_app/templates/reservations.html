@@ -9,23 +9,6 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Profile</title>
     <style>
-        .profile-container {
-            display: flex;
-        }
-        .profile-sidebar {
-            flex: 1;
-            padding: 20px;
-            border-right: 1px solid #ccc;
-        }
-        .profile-content {
-            flex: 3;
-            padding: 20px;
-        }
-        .profile-sidebar button {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-        }
         .reservations {
             margin-top: 20px;
         }
@@ -40,12 +23,6 @@
         .pending {
             color: orange;
         }
-        .profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
     </style>
 </head>
 <body>
@@ -54,6 +31,7 @@
         <ul class="nav__links" id="nav-links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Vos réservations</a></li>
             <li class="link" id="admin-link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
         </ul>
         <div id="user-info"></div>
@@ -118,70 +96,6 @@
         <h1 class="section__header">Profile</h1>
     </header>
 
-    <section class="section__container profile-container">
-        <aside class="profile-sidebar">
-            <img src="{% static 'images/default-profile.png' %}" alt="Profile Picture" class="profile-picture" id="profile-picture">
-            <button id="profile-tab" class="btn">Profile</button>
-            <button id="password-tab" class="btn">Change Password</button>
-            <button id="address-tab" class="btn">Change Address</button>
-            <button id="profile-picture-tab" class="btn">Change Profile Picture</button>
-        </aside>
-        <div class="profile-content">
-            <div id="profile-section" class="profile-section">
-                <h2>Profile Information</h2>
-                <p>First Name: <span id="profile-prenom"></span></p>
-                <p>Last Name: <span id="profile-nom"></span></p>
-                <p>Email: <span id="profile-email"></span></p>
-            </div>
-            <div id="password-section" class="profile-section" style="display: none;">
-                <h2>Change Password</h2>
-                <form id="change-password-form">
-                    <div>
-                        <label for="current-password">Current Password</label>
-                        <input type="password" id="current-password" name="current-password">
-                    </div>
-                    <div>
-                        <label for="new-password">New Password</label>
-                        <input type="password" id="new-password" name="new-password">
-                    </div>
-                    <div>
-                        <label for="confirm-password">Confirm New Password</label>
-                        <input type="password" id="confirm-password" name="confirm-password">
-                    </div>
-                    <button type="submit" class="btn">Change Password</button>
-                </form>
-            </div>
-            <div id="address-section" class="profile-section" style="display: none;">
-                <h2>Change Address</h2>
-                <form id="change-address-form">
-                    <div>
-                        <label for="country">Country</label>
-                        <input type="text" id="country" name="country">
-                    </div>
-                    <div>
-                        <label for="city">City</label>
-                        <input type="text" id="city" name="city">
-                    </div>
-                    <div>
-                        <label for="street">Street</label>
-                        <input type="text" id="street" name="street">
-                    </div>
-                    <button type="submit" class="btn">Change Address</button>
-                </form>
-            </div>
-            <div id="profile-picture-section" class="profile-section" style="display: none;">
-                <h2>Change Profile Picture</h2>
-                <form id="change-profile-picture-form" enctype="multipart/form-data">
-                    <div>
-                        <label for="profile-picture">Upload New Profile Picture</label>
-                        <input type="file" id="profile-picture-upload" name="profile-picture">
-                    </div>
-                    <button type="submit" class="btn">Upload</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
     <section class="section__container reservations__container">
         <h2>Your Reservations</h2>
         <div id="reservations" class="reservations"></div>
@@ -236,32 +150,6 @@
                 if (user) {
                     const sc = StringCodec();
                     const requestData = { user_email: user.email };
-
-                    // Afficher les informations de profil
-                    document.getElementById('profile-prenom').innerText = user.prenom;
-                    document.getElementById('profile-nom').innerText = user.nom;
-                    document.getElementById('profile-email').innerText = user.email;
-
-                    // Gestion des onglets
-                    document.getElementById('profile-tab').addEventListener('click', function() {
-                        showSection('profile-section');
-                    });
-                    document.getElementById('password-tab').addEventListener('click', function() {
-                        showSection('password-section');
-                    });
-                    document.getElementById('address-tab').addEventListener('click', function() {
-                        showSection('address-section');
-                    });
-                    document.getElementById('profile-picture-tab').addEventListener('click', function() {
-                        showSection('profile-picture-section');
-                    });
-
-                    function showSection(sectionId) {
-                        document.querySelectorAll('.profile-section').forEach(section => {
-                            section.style.display = 'none';
-                        });
-                        document.getElementById(sectionId).style.display = 'block';
-                    }
 
                     // Envoyer la demande de récupération des réservations via NATS
                     const response = await nc.request("get_reservations", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });

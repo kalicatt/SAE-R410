@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import index, destinations, signup_view, signup_success, login_view, login_success, profile_view, flight_detail
-from .views import admin_dashboard
+from .views import admin_dashboard, reservations
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -14,4 +14,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('flights/<str:flight_type>/<int:flight_id>/', flight_detail, name='flight_detail'),
     path('admin_dashboard/', admin_dashboard, name='admin_dashboard'),
+    path('reservations/', reservations, name='reservations')
 ]

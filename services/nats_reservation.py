@@ -7,6 +7,18 @@ import asyncio
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+async def get_client_by_id(client_id):
+    logging.debug(f"Getting client by ID: {client_id}")
+    async with aiohttp.ClientSession() as session:
+        url = f'http://127.0.0.1:8002/API-client/clients/{client_id}/'
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                logging.debug(f"Client data for ID {client_id}: {data}")
+                return data
+            logging.error(f"Failed to get client for ID {client_id}, status code: {response.status}")
+            return None
+
 async def create_reservation(user_email, flight_id):
     async with aiohttp.ClientSession() as session:
         # Get client data by email
@@ -152,8 +164,11 @@ async def get_all_reservations():
                     async with session.get(client_url) as client_response:
                         if client_response.status == 200:
                             client = await client_response.json()
-                            res['client_nom'] = client['nom']
-                            res['client_prenom'] = client['prenom']
+                            res['client_email'] = client['email']  # Add client email
+                            logging.debug(f"Client email for reservation {res['id']}: {res['client_email']}")
+                        else:
+                            logging.error(f"Failed to fetch client data for reservation {res['id']}")
+                            res['client_email'] = 'N/A'
                     # Get flight details
                     flight_url = f'http://127.0.0.1:8002/API-depart/vol-depart/{res["flight"]}/'
                     async with session.get(flight_url) as flight_response:
@@ -185,6 +200,26 @@ async def validate_reservation(reservation_id):
             else:
                 logging.error(f"Failed to validate reservation {reservation_id}")
                 return {'status': 'error', 'message': 'Failed to validate reservation'}
+
+async def revert_validate_reservation(reservation_id):
+    async with aiohttp.ClientSession() as session:
+        # Get reservation data
+        reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
+        async with session.get(reservation_url) as reservation_response:
+            if reservation_response.status != 200:
+                logging.error(f"Failed to fetch reservation data for id {reservation_id}")
+                return {'status': 'error', 'message': f'Reservation with id {reservation_id} does not exist'}
+            reservation = await reservation_response.json()
+
+        # Update reservation validation status
+        reservation['is_validated'] = False
+        async with session.put(reservation_url, json=reservation) as update_response:
+            if update_response.status == 200:
+                logging.debug(f"Reservation {reservation_id} validation reverted successfully")
+                return {'status': 'success', 'message': 'Reservation validation reverted successfully'}
+            else:
+                logging.error(f"Failed to revert validation for reservation {reservation_id}")
+                return {'status': 'error', 'message': 'Failed to revert reservation validation'}
 
 async def run_reservations():
     nc = NATS()
@@ -231,6 +266,8 @@ async def run_reservations():
             response = await get_all_reservations()
         elif subject == "validate_reservation":
             response = await validate_reservation(data.get('reservation_id'))
+        elif subject == "revert_validate_reservation":
+            response = await revert_validate_reservation(data.get('reservation_id'))
         else:
             response = {'status': 'error', 'message': 'Unknown subject'}
 
@@ -239,7 +276,7 @@ async def run_reservations():
             logging.debug(f"Published response: {response}")
 
     # Subscribe to the relevant subjects
-    subjects = ["reserve_flight", "get_reservations", "cancel_reservation", "get_all_reservations", "validate_reservation"]
+    subjects = ["reserve_flight", "get_reservations", "cancel_reservation", "get_all_reservations", "validate_reservation", "revert_validate_reservation"]
     for subject in subjects:
         try:
             await nc.subscribe(subject, cb=message_handler)

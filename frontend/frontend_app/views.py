@@ -20,6 +20,9 @@ def index(request):
 def destinations(request):
     return render(request, 'destinations.html')
 
+def reservations(request):
+    return render(request, 'reservations.html')
+
 @ensure_csrf_cookie
 def signup_view(request):
     if request.method == 'POST':

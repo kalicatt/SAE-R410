@@ -6,7 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Admin Dashboard</title>
+    <title>Admin</title>
     <style>
         .reservations {
             margin-top: 20px;
@@ -91,100 +91,94 @@
         </script>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Admin Dashboard</h1>
+        <h1 class="section__header">Admin</h1>
+        <a href="{% url 'profile' %}" class="btn">My Profile</a>
     </header>
-
-    <section class="section__container reservations__container">
-        <h2>All Reservations</h2>
+    <div class="section__container">
+        <h2>Reservations</h2>
         <div id="reservations" class="reservations"></div>
-    </section>
-
-    <footer class="footer">
-        <div class="section__container footer__container">
-            <div class="footer__col">
-                <h3>Albert Airline</h3>
-                <p>
-                    Projet cree dans le cadre de la SAE devcloud.
-                </p>
-            </div>
-            <div class="footer__col">
-                <h4>INFORMATION</h4>
-                <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-                <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
-            </div>
-            <div class="footer__col">
-                <h4>CONTACT</h4>
-                <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
-                <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
-                <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
-            </div>
-        </div>
-        <div class="section__container footer__bar">
-            <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
-        </div>
-    </footer>
+    </div>
 
     <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
-    
+
         document.addEventListener('DOMContentLoaded', async function() {
             console.log("Document loaded");
-    
+
             let nc;
-    
+
             try {
                 // Connect to the NATS server
                 nc = await connect({ servers: "ws://localhost:9222" });
                 console.log("Connected to NATS server");
-    
+
                 nc.closed().then(() => {
                     console.log("NATS server connection closed");
                 });
-    
+
                 const user = JSON.parse(sessionStorage.getItem('user'));
                 const reservationsContainer = document.getElementById('reservations');
-    
+
                 if (user) {
                     const sc = StringCodec();
                     const requestData = { user_email: user.email };
-    
+
                     try {
                         // Increase the timeout duration
                         console.log("Sending admin check request");
                         const adminResponse = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 10000 });
                         const adminData = JSON.parse(sc.decode(adminResponse.data));
                         console.log("Admin check response received:", adminData);
-    
+
                         if (adminData.status === 'success' && adminData.is_admin) {
                             console.log('User is admin');
-    
+
                             // Send reservations request
                             console.log("Sending reservations request");
                             const requestPayload = {}; // If no payload is needed, this can be empty or include necessary info
                             console.log("Request payload:", requestPayload);
-    
+
                             const response = await nc.request("get_all_reservations", sc.encode(JSON.stringify(requestPayload)), { timeout: 10000 });
                             const responseData = JSON.parse(sc.decode(response.data));
                             console.log("Reservations response received:", responseData);
-    
+
                             if (responseData.status === 'success') {
+                                const groupedReservations = {};
                                 responseData.data.forEach(reservation => {
-                                    const reservationDiv = document.createElement('div');
-                                    reservationDiv.classList.add('reservation');
-                                    reservationDiv.innerHTML = `
-                                        <p>Reservation ID: ${reservation.id}</p>
-                                        <p>Client: ${reservation.client_nom} ${reservation.client_prenom}</p>
-                                        <p>Flight: ${reservation.flight_details.flight_number}</p>
-                                        <p>Destination: ${reservation.flight_details.destination}</p>
-                                        <p>Prix Ticket: ${reservation.prix_ticket}</p>
-                                        <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
-                                            ${reservation.is_validated ? 'Validée' : 'En attente'}
-                                        </span></p>
-                                        ${!reservation.is_validated ? '<button class="btn validate-btn" data-reservation-id="' + reservation.id + '">Valider</button>' : ''}
-                                    `;
-                                    reservationsContainer.appendChild(reservationDiv);
+                                    const clientEmail = reservation.client_email;
+                                    console.log(`Client email: ${clientEmail}`); // Log the client email
+                                    if (!groupedReservations[clientEmail]) {
+                                        groupedReservations[clientEmail] = [];
+                                    }
+                                    groupedReservations[clientEmail].push(reservation);
                                 });
-    
+
+                                for (const clientEmail in groupedReservations) {
+                                    const clientReservations = groupedReservations[clientEmail];
+                                    const clientDiv = document.createElement('div');
+                                    clientDiv.classList.add('client-reservations');
+                                    clientDiv.innerHTML = `<h3>Les réservations de : ${clientEmail}</h3>`;
+                                    reservationsContainer.appendChild(clientDiv);
+
+                                    clientReservations.forEach(reservation => {
+                                        const reservationDiv = document.createElement('div');
+                                        reservationDiv.classList.add('reservation');
+                                        reservationDiv.innerHTML = `
+                                            <p>Reservation ID: ${reservation.id}</p>
+                                            <p>Client Email: ${reservation.client_email}</p>
+                                            <p>Flight: ${reservation.flight_details.flight_number}</p>
+                                            <p>Destination: ${reservation.flight_details.destination}</p>
+                                            <p>Prix Ticket: ${reservation.prix_ticket}</p>
+                                            <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
+                                                ${reservation.is_validated ? 'Validée' : 'En attente'}
+                                            </span></p>
+                                            ${!reservation.is_validated ? '<button class="btn validate-btn" data-reservation-id="' + reservation.id + '">Valider</button>' : ''}
+                                            ${reservation.is_validated ? '<button class="btn revert-validate-btn" data-reservation-id="' + reservation.id + '">Revert Validation</button>' : ''}
+                                        `;
+                                        clientDiv.appendChild(reservationDiv);
+                                    });
+                                }
+
                                 // Add event listeners for validate buttons
                                 document.querySelectorAll('.validate-btn').forEach(button => {
                                     button.addEventListener('click', async function() {
@@ -195,12 +189,33 @@
                                             const validateResponse = await nc.request("validate_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 10000 });
                                             const validateResponseData = JSON.parse(sc.decode(validateResponse.data));
                                             console.log("Validate response received:", validateResponseData);
-    
+
                                             if (validateResponseData.status === 'success') {
                                                 alert('Réservation validée avec succès');
                                                 location.reload(); // Reload the page to update the UI
                                             } else {
                                                 alert('Erreur lors de la validation de la réservation: ' + validateResponseData.message);
+                                            }
+                                        }
+                                    });
+                                });
+
+                                // Add event listeners for revert validate buttons
+                                document.querySelectorAll('.revert-validate-btn').forEach(button => {
+                                    button.addEventListener('click', async function() {
+                                        const reservationId = this.dataset.reservationId;
+                                        const confirmRevert = confirm(`Voulez-vous vraiment annuler la validation de la réservation ID: ${reservationId}?`);
+                                        if (confirmRevert) {
+                                            console.log(`Sending revert validate request for reservation ID: ${reservationId}`);
+                                            const revertValidateResponse = await nc.request("revert_validate_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 10000 });
+                                            const revertValidateResponseData = JSON.parse(sc.decode(revertValidateResponse.data));
+                                            console.log("Revert validate response received:", revertValidateResponseData);
+
+                                            if (revertValidateResponseData.status === 'success') {
+                                                alert('Validation de la réservation annulée avec succès');
+                                                location.reload(); // Reload the page to update the UI
+                                            } else {
+                                                alert('Erreur lors de l\'annulation de la validation de la réservation: ' + revertValidateResponseData.message);
                                             }
                                         }
                                     });

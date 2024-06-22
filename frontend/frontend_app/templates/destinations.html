@@ -19,7 +19,7 @@
             <li class="link"><a href="{% url 'reservations' %}">Vos réservations</a></li>
             <li class="link" id="admin-link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
         </ul>
-        <div id="user-info"></div>
+        <div class="nav__user" id="user-info"></div>
     </nav>
     <header class="section__container header__container">
         <h1 class="section__header">Listes des Vols</h1>
@@ -82,7 +82,7 @@
     
             if (user) {
                 userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                          <a href="{% url 'profile' %}">Profile</a>
+                                          <a href="{% url 'profile' %}" class="profile-link">Profile</a>
                                           <button id="logout-btn" class="btn">Logout</button>`;
             } else {
                 userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
@@ -234,7 +234,7 @@
 
             if (user) {
                 userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                          <a href="{% url 'profile' %}">Profile</a>
+                                          <a href="{% url 'profile' %}" class="profile-link">Profile</a>
                                           <button id="logout-btn" class="btn">Logout</button>`;
                 
                 try {

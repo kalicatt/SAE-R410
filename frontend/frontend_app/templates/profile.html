@@ -7,7 +7,7 @@
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Profile</title>
+    <title>Profil</title>
     <style>
         .profile-container {
             display: flex;
@@ -69,7 +69,7 @@
 
                 if (user) {
                     userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profil</a>
                                               <button id="logout-btn" class="btn">Logout</button>`;
                     
                     try {
@@ -116,26 +116,28 @@
         </script>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Profile</h1>
+        <h1 class="section__header">Profil</h1>
     </header>
 
     <section class="section__container profile-container">
         <aside class="profile-sidebar">
-            <img src="{% static 'images/default-profile.png' %}" alt="Profile Picture" class="profile-picture" id="profile-picture">
-            <button id="profile-tab" class="btn">Profile</button>
-            <button id="password-tab" class="btn">Change Password</button>
-            <button id="address-tab" class="btn">Change Address</button>
+            <img src="{% static 'images/photo-de-profil.jpg' %}" alt="Profile Picture" class="profile-picture" id="profile-picture">
+            <button id="profile-tab" class="btn">Profil</button>
+            <button id="password-tab" class="btn">Changer de mot de passe</button>
+            <button id="address-tab" class="btn">Changer d'adresse</button>
             <button id="profile-picture-tab" class="btn">Change Profile Picture</button>
         </aside>
         <div class="profile-content">
             <div id="profile-section" class="profile-section">
-                <h2>Profile Information</h2>
-                <p>First Name: <span id="profile-prenom"></span></p>
-                <p>Last Name: <span id="profile-nom"></span></p>
-                <p>Email: <span id="profile-email"></span></p>
+                <h2>Vos informations</h2>
+                <br>
+                <p>Prénom: <strong><span id="profile-prenom"></span> </strong></p>
+                <p>Nom de Famille: <strong><span id="profile-nom"></span> </strong></p>
+                <p>Email: <strong><span id="profile-email"></span></strong></p>
             </div>
             <div id="password-section" class="profile-section" style="display: none;">
-                <h2>Change Password</h2>
+                <h2>Changer de mot de passe</h2>
+                <br>
                 <form id="change-password-form">
                     <div>
                         <label for="current-password">Current Password</label>
@@ -149,11 +151,12 @@
                         <label for="confirm-password">Confirm New Password</label>
                         <input type="password" id="confirm-password" name="confirm-password">
                     </div>
+                    <br>
                     <button type="submit" class="btn">Change Password</button>
                 </form>
             </div>
             <div id="address-section" class="profile-section" style="display: none;">
-                <h2>Change Address</h2>
+                <h2>Changer d'adresse</h2>
                 <form id="change-address-form">
                     <div>
                         <label for="country">Country</label>
@@ -171,7 +174,7 @@
                 </form>
             </div>
             <div id="profile-picture-section" class="profile-section" style="display: none;">
-                <h2>Change Profile Picture</h2>
+                <h2>Changer de photo de profil</h2>
                 <form id="change-profile-picture-form" enctype="multipart/form-data">
                     <div>
                         <label for="profile-picture">Upload New Profile Picture</label>

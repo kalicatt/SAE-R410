@@ -34,7 +34,7 @@
             <li class="link"><a href="{% url 'reservations' %}">Vos réservations</a></li>
             <li class="link" id="admin-link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
         </ul>
-        <div id="user-info"></div>
+        <div class="nav__user" id="user-info"></div>
         <script type="module">
             import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
@@ -46,7 +46,7 @@
 
                 if (user) {
                     userInfoDiv.innerHTML = `<span>Welcome, ${user.prenom} ${user.nom}</span>
-                                              <a href="{% url 'profile' %}">Profile</a>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
                                               <button id="logout-btn" class="btn">Logout</button>`;
                     
                     try {
@@ -93,11 +93,11 @@
         </script>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Profile</h1>
+        <h1 class="section__header">Réservations</h1>
     </header>
 
     <section class="section__container reservations__container">
-        <h2>Your Reservations</h2>
+        <h2>Vos réservations</h2>
         <div id="reservations" class="reservations"></div>
     </section>
 
@@ -106,7 +106,7 @@
           <div class="footer__col">
             <h3>Albert Airline</h3>
             <p>
-             Projet cree dans le cadre de la SAE devcloud.
+             Projet crée dans le cadre de la SAE devcloud.
             </p>
           </div>
           <div class="footer__col">

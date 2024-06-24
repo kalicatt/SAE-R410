@@ -6,7 +6,6 @@ from django.utils.timezone import make_naive
 
 class FlightDeparture(models.Model):
     flight_number = models.CharField(max_length=50)
-    departure_airport = models.CharField(max_length=100)  # Nouveau champ pour l'aéroport de départ
     departure_time = models.DateTimeField()
     destination = models.CharField(max_length=100)
     prix = models.DecimalField(max_digits=10, decimal_places=2)

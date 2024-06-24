@@ -2,6 +2,7 @@ import json
 import aiohttp
 import logging
 from nats.aio.client import Client as NATS
+import asyncio
 
 # Configuration des logs
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -38,3 +39,6 @@ async def run_arrivals():
 
     await nc.subscribe("get_arrivals", cb=message_handler)
     logging.debug("Subscribed to 'get_arrivals'")
+
+if __name__ == "__main__":
+    asyncio.run(run_arrivals())

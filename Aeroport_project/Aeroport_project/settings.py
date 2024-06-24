@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'aeroport_db',
         'USER': 'root',
         'PASSWORD': 'azerty1234',
-        'HOST': 'host.docker.internal',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }

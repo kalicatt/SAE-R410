@@ -22,10 +22,10 @@ async def fetch_departures():
                 for departure in departures:
                     departure['prix'] = str(departure['prix'])
                 logging.debug(f"Départs récupérés : {departures}")
-                return {'status': 'succès', 'data': departures}
+                return {'status': 'success', 'data': departures}
             else:
                 logging.error(f"Échec de la récupération des départs, code de statut : {response.status}")
-                return {'status': 'erreur', 'message': 'Échec de la récupération des départs'}
+                return {'status': 'error', 'message': 'Échec de la récupération des départs'}
 
 async def run_departures():
     """

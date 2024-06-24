@@ -26,27 +26,29 @@
 </head>
 <body>
     <nav>
-        <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;">Albert Airlines</a>
-          <ul class="nav__links">
-              <li class="link"><a href="{% url 'index' %}">Home</a></li>
-              <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
-              <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
-              <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
-          </ul>
-          <div class="nav__user" id="user-info"></div>
-          <script type="module">
-              import { connect, StringCodec } from '{% static "js/nats.js" %}';
-  
-              document.addEventListener('DOMContentLoaded', async function() {
-                  const user = JSON.parse(sessionStorage.getItem('user'));
-                  const userInfoDiv = document.getElementById('user-info');
-                  const navLinks = document.getElementById('nav-links');
-                  const adminLink = document.getElementById('admin-link');
-  
-                  if (user) {
-                      userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
-                                                <a href="{% url 'profile' %}" class="profile-link">Profile</a>
-                                                <button id="logout-btn" class="btn">Logout</button>`;   
+        <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;text-decoration: none;">Albert Airlines</a>
+        <ul class="nav__links">
+            <li class="link"><a href="{% url 'index' %}">Home</a></li>
+            <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
+            <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+        </ul>
+        <div class="nav__user" id="user-info"></div>
+        <script type="module">
+            import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+            document.addEventListener('DOMContentLoaded', async function() {
+                console.log("Document loaded");
+
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const userInfoDiv = document.getElementById('user-info');
+                const adminLink = document.getElementById('admin-link');
+
+                if (user) {
+                    userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
+                                              <button id="logout-btn" class="btn">Logout</button>`;
+                    
                     try {
                         // Connexion au serveur NATS
                         const nc = await connect({ servers: "ws://localhost:9222" });
@@ -54,11 +56,12 @@
                         const requestData = { user_email: user.email };
                         
                         // Envoyer la demande de vérification d'admin via NATS
-                        const response = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
-                        const responseData = JSON.parse(sc.decode(response.data));
-                        console.log(responseData);
+                        console.log("Sending admin check request");
+                        const adminResponse = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 10000 });
+                        const adminData = JSON.parse(sc.decode(adminResponse.data));
+                        console.log("Admin check response received:", adminData);
                         
-                        if (responseData.status === 'success' && responseData.is_admin) {
+                        if (adminData.status === 'success' && adminData.is_admin) {
                             adminLink.style.display = 'block';
                             console.log('User is admin');
                         } else {
@@ -243,29 +246,29 @@
         });
     </script>
 
-<footer class="footer">
-    <div class="section__container footer__container" style="padding-top:30px; padding-bottom: 35px;">
-        <div class="footer__col">
-            <h3>Albert Airline</h3>
-            <p>
-                Projet cree dans le cadre de la SAE devcloud.
-            </p>
-        </div>
-        <div class="footer__col">
-            <h4>INFORMATION</h4>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
-          </div>
-          <div class="footer__col">
-            <h4>CONTACT</h4>
-              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
-              <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
-              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
-          </div>
+    <footer class="footer">
+        <div class="section__container footer__container" style="padding-top:30px; padding-bottom: 35px;">
+            <div class="footer__col">
+                <h3>Albert Airline</h3>
+                <p>
+                    Projet cree dans le cadre de la SAE devcloud.
+                </p>
+            </div>
+            <div class="footer__col">
+                <h4>INFORMATION</h4>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
+                <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
+            </div>
+            <div class="footer__col">
+                <h4>CONTACT</h4>
+                <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
+                <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
+                <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
+            </div>
         </div>
         <div class="section__container footer__bar">
-          <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
+            <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
         </div>
-</footer>
+    </footer>
 </body>
 </html>

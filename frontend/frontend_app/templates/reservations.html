@@ -134,37 +134,53 @@
         </div>
       </footer>
 
-    <script type="module">
+      <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
-
+    
         document.addEventListener('DOMContentLoaded', async function() {
             console.log("Document loaded");
-
+    
             let nc;
-
+    
             try {
                 // Connexion au serveur NATS
                 nc = await connect({ servers: "ws://localhost:9222" });
-
+    
                 console.log("Connecté au serveur NATS");
-
+    
                 nc.closed().then(() => {
                     console.log("Connexion au serveur NATS fermée");
                 });
-
+    
                 const user = JSON.parse(sessionStorage.getItem('user'));
                 const reservationsContainer = document.getElementById('reservations');
                 const noReservationsDiv = document.getElementById('no-reservations');
-
+                const adminLink = document.getElementById('admin-link');
+    
                 if (user) {
                     const sc = StringCodec();
                     const requestData = { user_email: user.email };
-
+    
+                    // Envoyer la demande de vérification d'admin via NATS
+                    console.log("Sending admin check request for user:", user.email);
+                    const adminResponse = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
+                    const adminResponseData = JSON.parse(sc.decode(adminResponse.data));
+                    console.log("Admin check response received:", adminResponseData);
+    
+                    if (adminResponseData.status === 'succès' && adminResponseData.is_admin === true) {
+                        adminLink.style.display = 'block';
+                        console.log('User is admin');
+                    } else {
+                        console.log('User is not admin');
+                    }
+    
                     // Envoyer la demande de récupération des réservations via NATS
+                    console.log("Sending request to get reservations for user:", user.email);
                     const response = await nc.request("get_reservations", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
                     const responseData = JSON.parse(sc.decode(response.data));
-
-                    if (responseData.status === 'success') {
+                    console.log("Response received:", responseData);
+    
+                    if (responseData.status === 'succès') {
                         if (responseData.data.length === 0) {
                             noReservationsDiv.style.display = 'block';
                         } else {
@@ -184,7 +200,7 @@
                                 `;
                                 reservationsContainer.appendChild(reservationDiv);
                             });
-
+    
                             // Ajouter les gestionnaires d'événements pour les boutons de paiement
                             document.querySelectorAll('.pay-btn').forEach(button => {
                                 button.addEventListener('click', function() {
@@ -193,16 +209,18 @@
                                     // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
                                 });
                             });
-
+    
                             // Ajouter les gestionnaires d'événements pour les boutons d'annulation
                             document.querySelectorAll('.cancel-btn').forEach(button => {
                                 button.addEventListener('click', async function() {
                                     const reservationId = this.dataset.reservationId;
                                     const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
                                     if (confirmCancel) {
+                                        console.log(`Cancelling reservation ID: ${reservationId}`);
                                         const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
                                         const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
-                                        if (cancelResponseData.status === 'success') {
+                                        console.log("Cancel response received:", cancelResponseData);
+                                        if (cancelResponseData.status === 'succès') {
                                             alert('Réservation annulée avec succès');
                                             location.reload(); // Reload the page to update the UI
                                         } else {
@@ -213,10 +231,10 @@
                             });
                         }
                     } else {
-                        console.error('Failed to fetch reservations');
+                        console.error('Failed to fetch reservations:', responseData.message);
                     }
                 }
-
+    
                 // Gestion du bouton logout
                 const logoutBtn = document.getElementById('logout-btn');
                 if (logoutBtn) {

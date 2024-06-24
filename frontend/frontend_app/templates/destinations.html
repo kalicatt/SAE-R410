@@ -12,7 +12,7 @@
 </head>
 <body>
     <nav>
-        <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;">Albert Airlines</a>
+        <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;text-decoration: none;">Albert Airlines</a>
         <ul class="nav__links">
             <li class="link"><a href="{% url 'index' %}">Home</a></li>
             <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
@@ -72,7 +72,6 @@
             </div>
     </footer>
 
-    <!-- Existing script for flights and pagination -->
     <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
@@ -203,19 +202,25 @@
                 // Récupérer et afficher les départs
                 const departuresResponse = await nc.request("get_departures", sc.encode(""), { timeout: 5000 });
                 departuresData = JSON.parse(sc.decode(departuresResponse.data));
+                console.log("Départs:", departuresData);
     
                 if (departuresData.status === 'success') {
                     const departuresContainer = document.getElementById('departures');
                     renderFlights(departuresContainer, departuresData.data, 1, 'departure');
+                } else {
+                    console.error("Erreur lors de la récupération des départs :", departuresData.message);
                 }
     
                 // Récupérer et afficher les arrivées
                 const arrivalsResponse = await nc.request("get_arrivals", sc.encode(""), { timeout: 5000 });
                 arrivalsData = JSON.parse(sc.decode(arrivalsResponse.data));
+                console.log("Arrivées:", arrivalsData);
     
                 if (arrivalsData.status === 'success') {
                     const arrivalsContainer = document.getElementById('arrivals');
                     renderFlights(arrivalsContainer, arrivalsData.data, 1, 'arrival');
+                } else {
+                    console.error("Erreur lors de la récupération des arrivées :", arrivalsData.message);
                 }
             } catch (err) {
                 console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
@@ -223,7 +228,6 @@
         });
     </script>
 
-    <!-- Additional script for user info and admin check -->
     <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -171,10 +171,11 @@
                                 const reservationDiv = document.createElement('div');
                                 reservationDiv.classList.add('reservation');
                                 reservationDiv.innerHTML = `
-                                    <p>Reservation ID: ${reservation.id}</p>
-                                    <p>Flight: ${reservation.flight_details.flight_number}</p>
+                                    <p>Numéro de réservation: ${reservation.id}</p>
+                                    <p>Vol: ${reservation.flight_details.flight_number}</p>
                                     <p>Destination: ${reservation.flight_details.destination}</p>
-                                    <p>Prix Ticket: ${reservation.prix_ticket}</p>
+                                    <p>Prix du ticket: ${reservation.prix_ticket}</p>
+                                    <p>Date de départ: ${new Date(reservation.flight_details.departure_time).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                                     <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
                                         ${reservation.is_validated ? 'Validée' : 'En attente'}
                                     </span></p>
@@ -214,6 +215,10 @@
                     } else {
                         console.error('Failed to fetch reservations');
                     }
+                } else {
+                    const noReservationsDiv = document.getElementById('no-reservations');
+                    noReservationsDiv.style.display = 'block';
+                    noReservationsDiv.innerHTML = "Veuillez vous connecter pour voir vos réservations.";
                 }
 
                 // Gestion du bouton logout

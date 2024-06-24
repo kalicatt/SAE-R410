@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,7 @@
     </header>
 
     <section class="section__container flights__container">
-        <h2 class="section__header">Départ des Vols</h2>
+        <h2 class="section__header">Depart des Vols</h2>
         <div class="flights_departure__header">
           <div>Numéro de vol</div>
           <div>Date de départ</div>
@@ -50,7 +50,7 @@
     <footer class="footer">
         <div class="section__container footer__container" style="padding-top:30px; padding-bottom: 35px;">
             <div class="footer__col">
-                <h3>Albert Airline</h3>
+                <h3>Albert Airlines</h3>
                 <p>
                     Projet cree dans le cadre de la SAE devcloud.
                 </p>
@@ -81,9 +81,9 @@
             const userInfoDiv = document.getElementById('user-info');
     
             if (user) {
-                userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
-                                          <a href="{% url 'profile' %}" class="profile-link">Profile</a>
-                                          <button id="logout-btn" class="btn">Deconnexion</button>`;
+                    userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
+                                              <button id="logout-btn" class="btn">Logout</button>`;
             } else {
                 userInfoDiv.innerHTML = `<button class="btn" onclick="window.location.href='{% url 'login' %}'">Login</button>`;
             }
@@ -113,8 +113,15 @@
     
                 // Fonction pour formater les dates
                 const formatDate = (dateString) => {
+                    const options = { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    };
                     const date = new Date(dateString);
-                    return date.toLocaleString();
+                    return date.toLocaleString('fr-FR', options);
                 };
     
                 // Fonction pour afficher les vols
@@ -233,9 +240,9 @@
             const adminLink = document.getElementById('admin-link');
 
             if (user) {
-                userInfoDiv.innerHTML = `<span style="width: 170px;">Bienvenue, ${user.prenom} ${user.nom}</span>
-                                          <a href="{% url 'profile' %}" class="profile-link">Profile</a>
-                                          <button id="logout-btn" class="btn">Log out</button>`;
+                    userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
+                                              <button id="logout-btn" class="btn">Logout</button>`;
                 
                 try {
                     // Connexion au serveur NATS

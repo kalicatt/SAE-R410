@@ -119,7 +119,8 @@
           <div class="footer__col">
             <h4>INFORMATION</h4>
             <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a><br>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'reservations' %}">Réservations</a>
           </div>
           <div class="footer__col">
             <h4>CONTACT</h4>
@@ -168,6 +169,15 @@
                             noReservationsDiv.style.display = 'block';
                         } else {
                             responseData.data.forEach(reservation => {
+                                const departureTime = new Date(reservation.flight_details.departure_time);
+                                const formattedDepartureTime = departureTime.toLocaleString('fr-FR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+
                                 const reservationDiv = document.createElement('div');
                                 reservationDiv.classList.add('reservation');
                                 reservationDiv.innerHTML = `
@@ -175,7 +185,7 @@
                                     <p>Vol: ${reservation.flight_details.flight_number}</p>
                                     <p>Destination: ${reservation.flight_details.destination}</p>
                                     <p>Prix du ticket: ${reservation.prix_ticket}</p>
-                                    <p>Date de départ: ${new Date(reservation.flight_details.departure_time).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                                    <p>Date de départ: ${formattedDepartureTime}</p>
                                     <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
                                         ${reservation.is_validated ? 'Validée' : 'En attente'}
                                     </span></p>

@@ -50,7 +50,7 @@
 
     <section class="section__container flight__container">
         <h2 class="section__header">{{ flight.flight_number }}</h2>
-        <p>Departure Time: {{ flight.departure_time }}</p>
+        <p>Date de départ: <span id="departure-time"></span></p>
         <p>Destination: {{ flight.destination }}</p>
         <p>Prix: {{ flight.prix }}</p>
         <p>Sieges Disponible: {{ flight.sieges_disponible }}</p>
@@ -60,7 +60,7 @@
     </section>
 
     <footer class="footer">
-        <div class="section__container footer__container">
+        <div class="section__container footer__container" style="padding-bottom: 40px;padding-top: 40px;">
           <div class="footer__col">
             <h3>Albert Airlines</h3>
             <p>
@@ -70,7 +70,8 @@
           <div class="footer__col">
             <h4>INFORMATION</h4>
             <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
-            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a> <br>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'reservations' %}">Réservations</a>
           </div>
           <div class="footer__col">
             <h4>CONTACT</h4>
@@ -90,6 +91,18 @@
         document.addEventListener('DOMContentLoaded', async function() {
             const user = JSON.parse(sessionStorage.getItem('user'));
             const reservationSection = document.getElementById('reservation-section');
+            const departureTimeElem = document.getElementById('departure-time');
+
+            const departureTimeRaw = "{{ flight.departure_time }}";
+            const departureTime = new Date(departureTimeRaw);
+            departureTimeElem.textContent = departureTime.toLocaleString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+            });
 
             if (user) {
                 const reserveBtn = document.createElement('button');

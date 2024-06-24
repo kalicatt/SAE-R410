@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
+    {% load static %}
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Payment</title>
+</head>
+<body>
+    <nav>
+        <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;">Albert Airlines</a>
+        <ul class="nav__links">
+            <li class="link"><a href="{% url 'index' %}">Home</a></li>
+            <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
+            <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+        </ul>
+        <div class="nav__user" id="user-info"></div>
+        <script type="module">
+            import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+            document.addEventListener('DOMContentLoaded', async function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const reservationId = urlParams.get('reservation_id');
+                const amount = urlParams.get('amount');
+                document.getElementById('amount').innerText = amount;
+
+                document.getElementById('confirm-payment').addEventListener('click', async function() {
+                    const user = JSON.parse(sessionStorage.getItem('user'));
+
+                    if (user) {
+                        const paymentData = {
+                            client_email: user.email,  // Utilisation de l'email au lieu de l'ID
+                            reservation_id: reservationId,
+                            amount: amount,
+                            method: 'Credit Card'
+                        };
+
+                        try {
+                            // Ouvrir une nouvelle fenêtre pour simuler la page de paiement bancaire
+                            const paymentWindow = window.open('/bank_payment/', 'Paiement Banque', 'width=500,height=600');
+
+                            // Attendre que la fenêtre se ferme
+                            const interval = setInterval(async () => {
+                                if (paymentWindow.closed) {
+                                    clearInterval(interval);
+                                    // Connexion au serveur NATS
+                                    const nc = await connect({ servers: "ws://localhost:9222" });
+                                    const sc = StringCodec();
+
+                                    // Envoyer la demande de paiement via NATS
+                                    const paymentResponse = await nc.request("process_payment", sc.encode(JSON.stringify(paymentData)), { timeout: 5000 });
+                                    const paymentResponseData = JSON.parse(sc.decode(paymentResponse.data));
+
+                                    if (paymentResponseData.status === 'success') {
+                                        alert('Paiement effectué avec succès');
+                                        window.location.href = "/reservations/";
+                                    } else {
+                                        alert('Erreur lors du paiement: ' + paymentResponseData.message);
+                                    }
+                                }
+                            }, 1000);
+                        } catch (err) {
+                            console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+                        }
+                    } else {
+                        alert('Veuillez vous connecter pour effectuer le paiement.');
+                        window.location.href = "{% url 'login' %}";
+                    }
+                });
+            });
+        </script>
+    </nav>
+    <header class="section__container header__container">
+        <h1 class="section__header">Paiement</h1>
+    </header>
+
+    <section class="section__container payment__container">
+        <h2>Confirmation du paiement</h2>
+        <p>Montant: <strong id="amount"></strong> €</p>
+        <button id="confirm-payment" class="btn">Confirmer le paiement</button>
+    </section>
+
+    <footer class="footer">
+        <div class="section__container footer__container">
+          <div class="footer__col">
+            <h3>Albert Airline</h3>
+            <p>
+             Projet cree dans le cadre de la SAE devcloud.
+            </p>
+          </div>
+          <div class="footer__col">
+            <h4>INFORMATION</h4>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'index' %}">Home</a><br>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'destinations' %}">Destinations</a><br>
+            <a style="color: rgb(255, 255, 255);" href="{% url 'reservations' %}">Réservations</a>
+          </div>
+          <div class="footer__col">
+            <h4>CONTACT</h4>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Servais Lucas</a><br>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/Fl0wwDev">Github Fradin Mahé</a><br>
+              <a style="color: rgb(255, 255, 255);" href="https://github.com/kalicatt">Github Antonio Christoper</a>
+          </div>
+        </div>
+        <div class="section__container footer__bar">
+          <p>Projet par : SERVAIS Lucas, FRADIN Mahé, ANTONIO Christopher</p>
+        </div>
+      </footer>
+
+    <script type="module">
+        import { connect, StringCodec } from '{% static "js/nats.js" %}';
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reservationId = urlParams.get('reservation_id');
+            const amount = urlParams.get('amount');
+            document.getElementById('amount').innerText = amount;
+
+            document.getElementById('confirm-payment').addEventListener('click', async function() {
+                const user = JSON.parse(sessionStorage.getItem('user'));
+
+                if (user) {
+                    const paymentData = {
+                        client_email: user.email,  // Utilisation de l'email au lieu de l'ID
+                        reservation_id: reservationId,
+                        amount: amount,
+                        method: 'Credit Card'
+                    };
+
+                    try {
+                        // Ouvrir une nouvelle fenêtre pour simuler la page de paiement bancaire
+                        const paymentWindow = window.open('/bank_payment/', 'Paiement Banque', 'width=500,height=600');
+
+                        // Attendre que la fenêtre se ferme
+                        const interval = setInterval(async () => {
+                            if (paymentWindow.closed) {
+                                clearInterval(interval);
+                                // Connexion au serveur NATS
+                                const nc = await connect({ servers: "ws://localhost:9222" });
+                                const sc = StringCodec();
+
+                                // Envoyer la demande de paiement via NATS
+                                const paymentResponse = await nc.request("process_payment", sc.encode(JSON.stringify(paymentData)), { timeout: 5000 });
+                                const paymentResponseData = JSON.parse(sc.decode(paymentResponse.data));
+
+                                if (paymentResponseData.status === 'success') {
+                                    alert('Paiement effectué avec succès');
+                                    window.location.href = "/reservations/";
+                                } else {
+                                    alert('Erreur lors du paiement: ' + paymentResponseData.message);
+                                }
+                            }
+                        }, 1000);
+                    } catch (err) {
+                        console.error(`Erreur de connexion au serveur NATS: ${err.message}`);
+                    }
+                } else {
+                    alert('Veuillez vous connecter pour effectuer le paiement.');
+                    window.location.href = "{% url 'login' %}";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

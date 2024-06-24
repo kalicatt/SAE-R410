@@ -77,3 +77,17 @@ def flight_detail(request, flight_id, flight_type):
     
 def admin_dashboard(request):
     return render(request, 'admin_dashboard.html')
+
+@login_required
+def payment(request):
+    reservation_id = request.GET.get('reservation_id')
+    amount = request.GET.get('amount')
+    context = {
+        'reservation_id': reservation_id,
+        'amount': amount
+    }
+    return render(request, 'payment.html', context)
+
+
+def bank_payment(request):
+    return render(request, 'bank_payment.html')

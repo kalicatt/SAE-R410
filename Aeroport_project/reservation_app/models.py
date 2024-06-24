@@ -10,7 +10,8 @@ class Reservation(models.Model):
     client_email = models.EmailField(max_length=254, default='default@example.com')  # Valeur par défaut ajoutée
     flight = models.ForeignKey(FlightDeparture, on_delete=models.CASCADE)
     prix_ticket = models.DecimalField(max_digits=10, decimal_places=2)
-    is_validated = models.BooleanField(default=False) 
+    is_validated = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False)  # Ajouter le champ is_paid
 
     class Meta:
         unique_together = ('client', 'flight')

@@ -5,10 +5,11 @@ from .models import Clients
 from .serializers import ClientSerializer
 from rest_framework.views import APIView
 from rest_framework import permissions
-from django.contrib.auth.hashers import check_password
+from rest_framework.authtoken.models import Token
 
 class ClientApiView(APIView):
-    
+    permission_classes = [permissions.AllowAny]
+
     def get(self, request, *args, **kwargs):
         email = request.query_params.get('email', None)
         if email:
@@ -34,47 +35,44 @@ class ClientApiView(APIView):
         serializer = ClientSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Create token for new user
+            token = Token.objects.create(user=serializer.instance)
+            return Response({'token': token.key, **serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ClientDetailApiView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def get(self, request, pk, *args, **kwargs):
-        client = Clients.objects.get(pk=pk)
-        if not client:
+        try:
+            client = Clients.objects.get(pk=pk)
+        except Clients.DoesNotExist:
             return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ClientSerializer(client, many=False)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk, *args, **kwargs):
-        client = Clients.objects.get(pk=pk)
-        if not client:
+        try:
+            client = Clients.objects.get(pk=pk)
+        except Clients.DoesNotExist:
             return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
         client.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request, pk, *args, **kwargs):
-        client = Clients.objects.get(pk=pk)
-        if not client:
+        try:
+            client = Clients.objects.get(pk=pk)
+        except Clients.DoesNotExist:
             return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        data = {
-            'nom': request.data.get('nom'),
-            'prenom': request.data.get('prenom'),
-            'email': request.data.get('email'),
-            'mot_de_passe': request.data.get('mot_de_passe'),
-            'telephone': request.data.get('telephone'),
-            'adresse': request.data.get('adresse'),
-            'ville': request.data.get('ville'),
-            'code_postal': request.data.get('code_postal'),
-            'pays': request.data.get('pays'),
-        }
+        # Extraire seulement le champ 'argent' à partir des données de la requête
+        data = {'argent': request.data.get('argent')}
 
         serializer = ClientSerializer(instance=client, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AuthenticateApiView(APIView):
 
@@ -88,6 +86,7 @@ class AuthenticateApiView(APIView):
             return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)
 
         if client.mot_de_passe == password:
-            return Response({'authenticated': True}, status=status.HTTP_200_OK)
+            token, created = Token.objects.get_or_create(user=client)
+            return Response({'authenticated': True, 'token': token.key}, status=status.HTTP_200_OK)
         else:
             return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)

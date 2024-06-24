@@ -1,5 +1,6 @@
 # client_app/models.py
 
+import random
 from django.db import models
 from django.utils import timezone
 
@@ -17,6 +18,12 @@ class Clients(models.Model):
     date_inscription = models.DateTimeField(default=timezone.now)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    argent = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+
+    def save(self, *args, **kwargs):
+        if not self.id:  
+            self.argent = random.uniform(400, 2000)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nom

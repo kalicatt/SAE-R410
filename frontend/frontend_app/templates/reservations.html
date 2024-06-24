@@ -23,6 +23,9 @@
         .pending {
             color: orange;
         }
+        .paid {
+            color: blue;
+        }
         .no-reservations {
             text-align: center;
             font-size: 1.2rem;
@@ -185,22 +188,49 @@
                                     <p>Vol: ${reservation.flight_details.flight_number}</p>
                                     <p>Destination: ${reservation.flight_details.destination}</p>
                                     <p>Prix du ticket: ${reservation.prix_ticket}</p>
-                                    <p>Date de départ: ${formattedDepartureTime}</p>
-                                    <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
-                                        ${reservation.is_validated ? 'Validée' : 'En attente'}
+                                    <p>Status: <span class="${reservation.is_paid ? 'paid' : reservation.is_validated ? 'validated' : 'pending'}">
+                                        ${reservation.is_paid ? 'Payé' : reservation.is_validated ? 'Validée' : 'En attente'}
                                     </span></p>
-                                    ${reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '">Payer</button>' : ''}
-                                    <button class="btn cancel-btn" data-reservation-id="${reservation.id}">Annuler</button>
+                                    ${!reservation.is_paid && reservation.is_validated ? '<button class="btn pay-btn" data-reservation-id="' + reservation.id + '" data-amount="' + reservation.prix_ticket + '">Payer</button>' : ''}
+                                    ${!reservation.is_paid ? '<button class="btn cancel-btn" data-reservation-id="' + reservation.id + '">Annuler</button>' : ''}
                                 `;
                                 reservationsContainer.appendChild(reservationDiv);
                             });
 
                             // Ajouter les gestionnaires d'événements pour les boutons de paiement
                             document.querySelectorAll('.pay-btn').forEach(button => {
-                                button.addEventListener('click', function() {
+                                button.addEventListener('click', async function() {
                                     const reservationId = this.dataset.reservationId;
-                                    alert(`Payer pour la réservation ID: ${reservationId}`);
-                                    // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
+                                    const amount = this.dataset.amount;
+                                    const paymentMethod = 'Credit Card'; // Exemple de méthode de paiement
+
+                                    const paymentData = {
+                                        client_email: user.email,
+                                        reservation_id: reservationId,
+                                        amount: amount,
+                                        method: paymentMethod
+                                    };
+
+                                    // Ouvrir une fenêtre pop-up pour simuler la page de paiement bancaire
+                                    const paymentWindow = window.open('/bank_payment/', 'Paiement Banque', 'width=500,height=600');
+
+                                    // Attendre que la fenêtre se ferme
+                                    const interval = setInterval(async () => {
+                                        if (paymentWindow.closed) {
+                                            clearInterval(interval);
+
+                                            // Envoyer la demande de paiement via NATS
+                                            const paymentResponse = await nc.request("process_payment", sc.encode(JSON.stringify(paymentData)), { timeout: 5000 });
+                                            const paymentResponseData = JSON.parse(sc.decode(paymentResponse.data));
+
+                                            if (paymentResponseData.status === 'success') {
+                                                alert('Paiement effectué avec succès');
+                                                window.location.reload(); // Reload the page to update the UI
+                                            } else {
+                                                alert('Erreur lors du paiement: ' + paymentResponseData.message);
+                                            }
+                                        }
+                                    }, 1000);
                                 });
                             });
 

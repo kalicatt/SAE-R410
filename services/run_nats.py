@@ -6,6 +6,9 @@ from nats_departures import run_departures
 from nats_arrivals import run_arrivals
 from nats_reservation import run_reservations
 from nats_admin import run_check_admin
+from nats_payement import run_payment
+from nats_money import run_money
+from change_password_service import run_password_service
 
 async def shutdown(loop, signal=None):
     """
@@ -46,6 +49,9 @@ def run_nats_tasks():
         loop.create_task(run_arrivals()),
         loop.create_task(run_reservations()),
         loop.create_task(run_check_admin()),
+        loop.create_task(run_payment()),
+        loop.create_task(run_money()),
+        loop.create_task(run_password_service())
     ]
 
     if sys.platform == "win32":

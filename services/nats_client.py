@@ -129,6 +129,30 @@ async def verify_email(email):
     exists = await check_client_exists(email)
     return {'status': 'success', 'is_unique': not exists}
 
+async def get_client_money_by_email(email):
+    """
+    Récupère l'argent du client par email.
+
+    Args:
+        email (str): L'email du client.
+
+    Returns:
+        dict: Un dictionnaire contenant l'argent du client.
+    """
+    logging.debug(f"Obtention de l'argent du client pour l'email : {email}")
+    async with aiohttp.ClientSession() as session:
+        url = f'http://127.0.0.1:8002/API-client/clients/?email={email}'
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                logging.debug(f"Réponse de l'API pour l'email {email} : {data}")
+                if isinstance(data, list) and len(data) > 0:
+                    client = data[0]
+                    return {'status': 'success', 'argent': client['argent']}
+                return {'status': 'error', 'message': 'Client not found'}
+            logging.error(f"Échec de l'obtention du client pour l'email {email}, code de statut : {response.status}")
+            return {'status': 'error', 'message': 'Failed to fetch client data'}
+
 async def run_login_signup():
     """
     Exécute le processus de connexion, d'inscription et de vérification d'email via NATS.
@@ -148,6 +172,8 @@ async def run_login_signup():
             response = await authenticate_user(data)
         elif subject == "verify_email":
             response = await verify_email(data.get('email'))
+        elif subject == "get_client_money":
+            response = await get_client_money_by_email(data.get('email'))
         else:
             response = {'status': 'error', 'message': 'Sujet inconnu'}
         if reply:
@@ -157,7 +183,8 @@ async def run_login_signup():
     await nc.subscribe("signup", cb=message_handler)
     await nc.subscribe("login", cb=message_handler)
     await nc.subscribe("verify_email", cb=message_handler)
-    logging.debug("Abonné aux sujets 'signup', 'login' et 'verify_email'")
+    await nc.subscribe("get_client_money", cb=message_handler)
+    logging.debug("Abonné aux sujets 'signup', 'login', 'verify_email', et 'get_client_money'")
 
 if __name__ == "__main__":
     asyncio.run(run_login_signup())

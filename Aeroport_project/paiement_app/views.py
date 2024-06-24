@@ -9,3 +9,5 @@ class PaiementListCreateView(generics.ListCreateAPIView):
 class PaiementDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Paiement.objects.all()
     serializer_class = PaiementSerializer
+
+

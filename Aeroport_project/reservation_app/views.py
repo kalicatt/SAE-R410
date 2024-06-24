@@ -10,6 +10,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
+from rest_framework import generics
 
 class ReservationListAPIView(APIView):
     def get(self, request):
@@ -79,3 +80,10 @@ def validate_reservation(request, reservation_id):
     reservation.is_validated = True
     reservation.save()
     return redirect(reverse('admin_reservations'))
+
+class ReservationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

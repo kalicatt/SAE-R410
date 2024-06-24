@@ -189,7 +189,11 @@
     
                 fetch('/signup/', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
                 })
                 .then(response => {
                     submitButton.disabled = false;

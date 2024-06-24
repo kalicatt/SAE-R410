@@ -1,5 +1,6 @@
 import asyncio
 import signal
+import sys
 from nats_client import run_login_signup
 from nats_departures import run_departures
 from nats_arrivals import run_arrivals
@@ -47,8 +48,13 @@ def run_nats_tasks():
         loop.create_task(run_check_admin()),
     ]
 
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, lambda sig=sig: asyncio.create_task(shutdown(loop, sig)))
+    if sys.platform == "win32":
+        # Windows does not support loop.add_signal_handler
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, lambda s=sig: asyncio.create_task(shutdown(loop, s)))
+    else:
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            loop.add_signal_handler(sig, lambda sig=sig: asyncio.create_task(shutdown(loop, sig)))
 
     try:
         loop.run_forever()

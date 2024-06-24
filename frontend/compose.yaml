@@ -7,26 +7,21 @@
 # You can add other services your application may depend on here, such as a
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
-
-
-version: '3.8'
-
 services:
   server:
     build:
       context: .
-    command: python manage.py runserver 0.0.0.0:8002  # Change 127.0.0.1 to 0.0.0.0 to allow connections from outside the container
     ports:
-      - "8002:8002"
+      - 8001:8001
+    command: python manage.py runserver 0.0.0.0:8001
     environment:
       - DATABASE_HOST=localhost  # Assuming your Django settings use these environment variables
       - DATABASE_NAME=aeroport_db
       - DATABASE_USER=root
       - DATABASE_PASSWORD=azerty1234
       - DATABASE_PORT=3306
-
-
-
+      
+     
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to
 # start the database before your application. The `db-data` volume persists the

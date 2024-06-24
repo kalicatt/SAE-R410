@@ -7,7 +7,7 @@
     {% load static %}
     <link rel="icon" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    <title>Vos Réservations</title>
+    <title>Vos réservations</title>
     <style>
         .reservations {
             margin-top: 20px;
@@ -25,7 +25,7 @@
         }
         .no-reservations {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             color: #333;
             margin-top: 20px;
         }
@@ -34,28 +34,27 @@
 <body>
     <nav>
         <a class="nav__logo" href="/" style="width: 200px;margin-right: 25px;">Albert Airlines</a>
-          <ul class="nav__links">
-              <li class="link"><a href="{% url 'index' %}">Home</a></li>
-              <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
-              <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
-              <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
-          </ul>
-          <div class="nav__user" id="user-info"></div>
-          <script type="module">
-              import { connect, StringCodec } from '{% static "js/nats.js" %}';
-  
-              document.addEventListener('DOMContentLoaded', async function() {
-                  const user = JSON.parse(sessionStorage.getItem('user'));
-                  const userInfoDiv = document.getElementById('user-info');
-                  const navLinks = document.getElementById('nav-links');
-                  const adminLink = document.getElementById('admin-link');
-  
-                  if (user) {
-                      userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
-                                                <a href="{% url 'profile' %}" class="profile-link">Profile</a>
-                                                <button id="logout-btn" class="btn">Logout</button>`;
-                    
+        <ul class="nav__links">
+            <li class="link"><a href="{% url 'index' %}">Home</a></li>
+            <li class="link"><a href="{% url 'destinations' %}">Destinations</a></li>
+            <li class="link"><a href="{% url 'reservations' %}">Réservations</a></li>
+            <li id="admin-link" class="link" style="display: none;"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+        </ul>
+        <div class="nav__user" id="user-info"></div>
+        <script type="module">
+            import { connect, StringCodec } from '{% static "js/nats.js" %}';
 
+            document.addEventListener('DOMContentLoaded', async function() {
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const userInfoDiv = document.getElementById('user-info');
+                const navLinks = document.getElementById('nav-links');
+                const adminLink = document.getElementById('admin-link');
+
+                if (user) {
+                    userInfoDiv.innerHTML = `<span style="width: 168px;">Bienvenue, ${user.prenom} ${user.nom}</span>
+                                              <a href="{% url 'profile' %}" class="profile-link">Profile</a>
+                                              <button id="logout-btn" class="btn">Logout</button>`;
+                    
                     try {
                         // Connexion au serveur NATS
                         const nc = await connect({ servers: "ws://localhost:9222" });
@@ -106,15 +105,15 @@
     <section class="section__container reservations__container">
         <h2>Vos réservations</h2>
         <div id="reservations" class="reservations"></div>
-        <div id="no-reservations" class="no-reservations" style="display: none;">Vous n'avez pas de réservations actuellement</div>
+        <div id="no-reservations" class="no-reservations" style="display: none;">Vous n'avez aucune réservation actuellement</div>
     </section>
 
     <footer class="footer">
-        <div class="section__container footer__container" style="padding-top:30px; padding-bottom: 35px;">
+        <div class="section__container footer__container">
           <div class="footer__col">
             <h3>Albert Airline</h3>
             <p>
-             Projet crée dans le cadre de la SAE devcloud.
+             Projet cree dans le cadre de la SAE devcloud.
             </p>
           </div>
           <div class="footer__col">
@@ -134,53 +133,37 @@
         </div>
       </footer>
 
-      <script type="module">
+    <script type="module">
         import { connect, StringCodec } from '{% static "js/nats.js" %}';
-    
+
         document.addEventListener('DOMContentLoaded', async function() {
             console.log("Document loaded");
-    
+
             let nc;
-    
+
             try {
                 // Connexion au serveur NATS
                 nc = await connect({ servers: "ws://localhost:9222" });
-    
+
                 console.log("Connecté au serveur NATS");
-    
+
                 nc.closed().then(() => {
                     console.log("Connexion au serveur NATS fermée");
                 });
-    
+
                 const user = JSON.parse(sessionStorage.getItem('user'));
                 const reservationsContainer = document.getElementById('reservations');
                 const noReservationsDiv = document.getElementById('no-reservations');
-                const adminLink = document.getElementById('admin-link');
-    
+
                 if (user) {
                     const sc = StringCodec();
                     const requestData = { user_email: user.email };
-    
-                    // Envoyer la demande de vérification d'admin via NATS
-                    console.log("Sending admin check request for user:", user.email);
-                    const adminResponse = await nc.request("check_admin", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
-                    const adminResponseData = JSON.parse(sc.decode(adminResponse.data));
-                    console.log("Admin check response received:", adminResponseData);
-    
-                    if (adminResponseData.status === 'succès' && adminResponseData.is_admin === true) {
-                        adminLink.style.display = 'block';
-                        console.log('User is admin');
-                    } else {
-                        console.log('User is not admin');
-                    }
-    
+
                     // Envoyer la demande de récupération des réservations via NATS
-                    console.log("Sending request to get reservations for user:", user.email);
                     const response = await nc.request("get_reservations", sc.encode(JSON.stringify(requestData)), { timeout: 5000 });
                     const responseData = JSON.parse(sc.decode(response.data));
-                    console.log("Response received:", responseData);
-    
-                    if (responseData.status === 'succès') {
+
+                    if (responseData.status === 'success') {
                         if (responseData.data.length === 0) {
                             noReservationsDiv.style.display = 'block';
                         } else {
@@ -200,7 +183,7 @@
                                 `;
                                 reservationsContainer.appendChild(reservationDiv);
                             });
-    
+
                             // Ajouter les gestionnaires d'événements pour les boutons de paiement
                             document.querySelectorAll('.pay-btn').forEach(button => {
                                 button.addEventListener('click', function() {
@@ -209,18 +192,16 @@
                                     // Ajoutez ici la logique de paiement (ex. redirection vers une page de paiement)
                                 });
                             });
-    
+
                             // Ajouter les gestionnaires d'événements pour les boutons d'annulation
                             document.querySelectorAll('.cancel-btn').forEach(button => {
                                 button.addEventListener('click', async function() {
                                     const reservationId = this.dataset.reservationId;
                                     const confirmCancel = confirm(`Voulez-vous vraiment annuler la réservation ID: ${reservationId}?`);
                                     if (confirmCancel) {
-                                        console.log(`Cancelling reservation ID: ${reservationId}`);
                                         const cancelResponse = await nc.request("cancel_reservation", sc.encode(JSON.stringify({ reservation_id: reservationId })), { timeout: 5000 });
                                         const cancelResponseData = JSON.parse(sc.decode(cancelResponse.data));
-                                        console.log("Cancel response received:", cancelResponseData);
-                                        if (cancelResponseData.status === 'succès') {
+                                        if (cancelResponseData.status === 'success') {
                                             alert('Réservation annulée avec succès');
                                             location.reload(); // Reload the page to update the UI
                                         } else {
@@ -231,10 +212,10 @@
                             });
                         }
                     } else {
-                        console.error('Failed to fetch reservations:', responseData.message);
+                        console.error('Failed to fetch reservations');
                     }
                 }
-    
+
                 // Gestion du bouton logout
                 const logoutBtn = document.getElementById('logout-btn');
                 if (logoutBtn) {

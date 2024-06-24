@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test WebSocket NATS</title>
+</head>
+<body>
+    <h1>Test WebSocket NATS</h1>
+    <script>
+        const ws = new WebSocket('ws://localhost:9222');
+
+        ws.onopen = function() {
+            console.log('Connecté au serveur NATS via WebSocket');
+        };
+
+        ws.onerror = function(error) {
+            console.error('Erreur de connexion WebSocket :', error);
+        };
+
+        ws.onmessage = function(message) {
+            console.log('Message reçu :', message.data);
+        };
+    </script>
+</body>
+</html>

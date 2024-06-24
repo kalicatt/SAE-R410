@@ -284,7 +284,7 @@ async def run_reservations():
         except Exception as e:
             logging.error(f"Failed to subscribe to subject '{subject}': {e}")
 
-    # Keep the connection alive
+    
     try:
         while True:
             await asyncio.sleep(1)

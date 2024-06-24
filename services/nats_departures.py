@@ -3,9 +3,23 @@ import aiohttp
 import logging
 from nats.aio.client import Client as NATS
 import asyncio
+from datetime import datetime
 
 # Configuration des logs
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def format_date(date_str):
+    """
+    Formatte une date au format 'jour/mois/année heure:minute'.
+
+    Args:
+        date_str (str): La date en chaîne de caractères.
+
+    Returns:
+        str: La date formatée.
+    """
+    date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+    return date.strftime('%d/%m/%Y %H:%M')
 
 async def fetch_departures():
     """
@@ -21,6 +35,7 @@ async def fetch_departures():
                 departures = await response.json()
                 for departure in departures:
                     departure['prix'] = str(departure['prix'])
+                    departure['formatted_departure_time'] = format_date(departure['departure_time'])
                 logging.debug(f"Départs récupérés : {departures}")
                 return {'status': 'success', 'data': departures}
             else:

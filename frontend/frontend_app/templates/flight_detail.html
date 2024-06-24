@@ -45,7 +45,7 @@
         </script>
     </nav>
     <header class="section__container header__container">
-        <h1 class="section__header">Flight Detail</h1>
+        <h1 class="section__header">Détail du vol</h1>
     </header>
 
     <section class="section__container flight__container">
@@ -62,9 +62,9 @@
     <footer class="footer">
         <div class="section__container footer__container">
           <div class="footer__col">
-            <h3>Albert Airline</h3>
+            <h3>Albert Airlines</h3>
             <p>
-             Projet cree dans le cadre de la SAE devcloud.
+             Projet crée dans le cadre de la SAE devcloud.
             </p>
           </div>
           <div class="footer__col">
@@ -128,7 +128,7 @@
                     }
                 });
             } else {
-                reservationSection.innerHTML = '<p class="login-message">You must be logged in to reserve a flight. <a href="{% url "login" %}">Login here</a>.</p>';
+                reservationSection.innerHTML = '<p class="login-message">Vous devez être connecté pour réserver un vol. Veuillez vous connecter <a href="{% url "login" %}">ici</a>.</p>';
             }
 
             // Gestion du bouton logout

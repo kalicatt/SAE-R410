@@ -5,7 +5,6 @@ from .models import Clients
 from .serializers import ClientSerializer
 from rest_framework.views import APIView
 from rest_framework import permissions
-from rest_framework.authtoken.models import Token
 
 class ClientApiView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -35,9 +34,7 @@ class ClientApiView(APIView):
         serializer = ClientSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            # Create token for new user
-            token = Token.objects.create(user=serializer.instance)
-            return Response({'token': token.key, **serializer.data}, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ClientDetailApiView(APIView):
@@ -65,8 +62,7 @@ class ClientDetailApiView(APIView):
         except Clients.DoesNotExist:
             return Response({'error': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Extraire seulement le champ 'argent' à partir des données de la requête
-        data = {'argent': request.data.get('argent')}
+        data = request.data  # Mise à jour avec les données complètes
 
         serializer = ClientSerializer(instance=client, data=data, partial=True)
         if serializer.is_valid():
@@ -86,7 +82,6 @@ class AuthenticateApiView(APIView):
             return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)
 
         if client.mot_de_passe == password:
-            token, created = Token.objects.get_or_create(user=client)
-            return Response({'authenticated': True, 'token': token.key}, status=status.HTTP_200_OK)
+            return Response({'authenticated': True, 'message': 'Login successful'}, status=status.HTTP_200_OK)
         else:
             return Response({'authenticated': False, 'message': 'Invalid credentials'}, status=status.HTTP_200_OK)

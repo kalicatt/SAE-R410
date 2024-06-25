@@ -52,7 +52,7 @@ async def create_reservation(user_email, flight_id):
                 filtered_reservations = [res for res in existing_reservations if res['client'] == client['id'] and res['flight'] == flight['id']]
                 logging.debug(f"Filtered reservations for client {client['id']} and flight {flight['id']}: {filtered_reservations}")
                 if filtered_reservations:
-                    return {'status': 'error', 'message': 'You have already reserved this flight.'}
+                    return {'status': 'error', 'message': 'Vous avez déjà réserver ce vol'}
 
         # Create reservation if seats are available
         if flight['sieges_disponible'] > 0:
@@ -140,7 +140,7 @@ async def cancel_reservation(reservation_id):
                         async with session.put(flight_url, json=flight) as update_response:
                             if update_response.status == 200:
                                 logging.debug(f"Flight seat availability updated successfully for flight {reservation['flight']}")
-                                return {'status': 'success', 'message': 'Reservation cancelled successfully'}
+                                return {'status': 'success', 'message': 'Annulation de réservation réussite'}
                             else:
                                 logging.error(f"Failed to update flight seat availability for flight {reservation['flight']}")
                                 return {'status': 'error', 'message': 'Failed to update flight seat availability'}

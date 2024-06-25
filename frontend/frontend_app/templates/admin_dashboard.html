@@ -165,12 +165,12 @@
                                         const reservationDiv = document.createElement('div');
                                         reservationDiv.classList.add('reservation');
                                         reservationDiv.innerHTML = `
-                                            <p>Reservation ID: ${reservation.id}</p>
+                                            <p>Numéro de réservation: ${reservation.id}</p>
                                             <p>Client Email: ${reservation.client_email}</p>
-                                            <p>Flight: ${reservation.flight_details.flight_number}</p>
+                                            <p>Vol: ${reservation.flight_details.flight_number}</p>
                                             <p>Destination: ${reservation.flight_details.destination}</p>
                                             <p>Prix Ticket: ${reservation.prix_ticket}</p>
-                                            <p>Status: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
+                                            <p>Statut: <span class="${reservation.is_validated ? 'validated' : 'pending'}">
                                                 ${reservation.is_validated ? 'Validée' : 'En attente'}
                                             </span></p>
                                             ${!reservation.is_validated ? '<button class="btn validate-btn" data-reservation-id="' + reservation.id + '">Valider</button>' : ''}

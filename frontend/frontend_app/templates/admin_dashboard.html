@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.4.0/fonts/remixicon.css" rel="stylesheet">
+    
     {% load static %}
+    <link rel="icon" href="{% static 'images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <title>Admin</title>
     <style>
@@ -96,7 +98,7 @@
         <a href="{% url 'profile' %}" class="btn">My Profile</a>
     </header>
     <div class="section__container">
-        <h2>Reservations</h2>
+        <h2>Réservations</h2>
         <div id="reservations" class="reservations"></div>
     </div>
 
@@ -174,7 +176,7 @@
                                                 ${reservation.is_validated ? 'Validée' : 'En attente'}
                                             </span></p>
                                             ${!reservation.is_validated ? '<button class="btn validate-btn" data-reservation-id="' + reservation.id + '">Valider</button>' : ''}
-                                            ${reservation.is_validated ? '<button class="btn revert-validate-btn" data-reservation-id="' + reservation.id + '">Revert Validation</button>' : ''}
+                                            ${reservation.is_validated ? '<button class="btn revert-validate-btn" data-reservation-id="' + reservation.id + '">Annuler validation</button>' : ''}
                                         `;
                                         clientDiv.appendChild(reservationDiv);
                                     });

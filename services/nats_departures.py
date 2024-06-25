@@ -17,6 +17,10 @@ def format_date(date_str):
 
     Returns:
         str: La date formatée.
+
+    Exemple:
+        date_formattee = format_date("2023-06-25T14:00:00Z")
+        print(date_formattee)  # Output: '25/06/2023 14:00'
     """
     date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
     return date.strftime('%d/%m/%Y %H:%M')
@@ -27,6 +31,10 @@ async def fetch_departures():
 
     Returns:
         dict: Un dictionnaire contenant le statut de l'opération et les données des départs.
+
+    Exemple:
+        departures = await fetch_departures()
+        print(departures)
     """
     logging.debug("Récupération des départs depuis l'API...")
     async with aiohttp.ClientSession() as session:
@@ -45,6 +53,9 @@ async def fetch_departures():
 async def run_departures():
     """
     Exécute la récupération des départs via NATS.
+
+    Exemple:
+        asyncio.run(run_departures())
     """
     logging.debug("Connexion au serveur NATS...")
     nc = NATS()
@@ -53,6 +64,15 @@ async def run_departures():
     logging.debug("Connecté au serveur NATS. Abonnement à 'get_departures'...")
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur le sujet 'get_departures'.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         logging.debug(f"Message reçu sur le sujet '{subject}' avec réponse '{reply}'")

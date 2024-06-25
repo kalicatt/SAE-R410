@@ -8,6 +8,20 @@ import asyncio
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def check_and_update_balance(payment_data):
+    """
+    Vérifie le solde d'un client et le met à jour en fonction d'un paiement.
+
+    Args:
+        payment_data (dict): Les données de paiement, y compris 'client_email' et 'amount'.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        payment_data = {'client_email': 'client@example.com', 'amount': 50.0}
+        result = await check_and_update_balance(payment_data)
+        print(result)
+    """
     async with aiohttp.ClientSession() as session:
         client_email = payment_data['client_email']
         client_url = f'http://127.0.0.1:8002/API-client/clients/?email={client_email}'
@@ -39,6 +53,12 @@ async def check_and_update_balance(payment_data):
                 return {'status': 'error', 'message': 'Vous n avez pas assez d argent pour effectuer cette transaction'}
 
 async def run_money():
+    """
+    Exécute la vérification et la mise à jour du solde via NATS.
+
+    Exemple:
+        asyncio.run(run_money())
+    """
     logging.debug("Connecting to NATS server...")
     nc = NATS()
     await nc.connect(servers=["nats://localhost:4222"])
@@ -46,6 +66,15 @@ async def run_money():
     logging.debug("Connected to NATS server. Subscribing to 'check_and_update_balance'...")
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur le sujet 'check_and_update_balance'.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         data = json.loads(msg.data.decode())

@@ -5,9 +5,22 @@ from nats.aio.client import Client as NATS
 import asyncio
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname=s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def check_admin_status(user_email):
+    """
+    Vérifie si l'utilisateur avec l'email fourni a le statut administrateur.
+
+    Args:
+        user_email (str): L'email de l'utilisateur à vérifier.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de la vérification et une indication si l'utilisateur est administrateur.
+
+    Exemple:
+        result = await check_admin_status("exemple@domaine.com")
+        print(result)
+    """
     async with aiohttp.ClientSession() as session:
         # Get client data by email
         client_url = f'http://127.0.0.1:8002/API-client/clients/?email={user_email}'
@@ -28,6 +41,16 @@ async def check_admin_status(user_email):
                 return {'status': 'success', 'is_admin': False}
 
 async def get_all_reservations():
+    """
+    Récupère toutes les réservations et ajoute les détails des vols à chaque réservation.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et les données des réservations.
+
+    Exemple:
+        reservations = await get_all_reservations()
+        print(reservations)
+    """
     async with aiohttp.ClientSession() as session:
         reservations_url = 'http://127.0.0.1:8002/API-reservation/reservations/'
         async with session.get(reservations_url) as reservations_response:
@@ -48,6 +71,13 @@ async def get_all_reservations():
                 return {'status': 'error', 'message': 'Failed to fetch reservations'}
 
 async def run_check_admin():
+    """
+    Se connecte au serveur NATS, s'abonne aux sujets 'check_admin' et 'get_all_reservations', 
+    et gère les messages reçus sur ces sujets.
+
+    Exemple:
+        asyncio.run(run_check_admin())
+    """
     nc = NATS()
 
     # Try connecting to the NATS server
@@ -59,6 +89,15 @@ async def run_check_admin():
         return
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur les sujets 'check_admin' et 'get_all_reservations'.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         data = msg.data.decode()

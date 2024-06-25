@@ -8,6 +8,19 @@ import asyncio
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def get_client_by_id(client_id):
+    """
+    Récupère les informations d'un client par son ID.
+
+    Args:
+        client_id (int): L'ID du client.
+
+    Returns:
+        dict: Les données du client si elles existent, None sinon.
+
+    Exemple:
+        client = await get_client_by_id(1)
+        print(client)
+    """
     logging.debug(f"Getting client by ID: {client_id}")
     async with aiohttp.ClientSession() as session:
         url = f'http://127.0.0.1:8002/API-client/clients/{client_id}/'
@@ -20,6 +33,20 @@ async def get_client_by_id(client_id):
             return None
 
 async def create_reservation(user_email, flight_id):
+    """
+    Crée une réservation pour un vol spécifique pour un utilisateur donné.
+
+    Args:
+        user_email (str): L'email de l'utilisateur.
+        flight_id (int): L'ID du vol.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        response = await create_reservation("user@example.com", 1)
+        print(response)
+    """
     async with aiohttp.ClientSession() as session:
         # Get client data by email
         client_url = f'http://127.0.0.1:8002/API-client/clients/?email={user_email}'
@@ -67,7 +94,7 @@ async def create_reservation(user_email, flight_id):
                     flight['sieges_disponible'] -= 1
                     async with session.put(flight_url, json=flight) as update_response:
                         if update_response.status == 200:
-                            return {'status': 'success', 'message': 'Reservation successful'}
+                            return {'status': 'success', 'message': 'Réservation réussite'}
                         else:
                             logging.error("Failed to update flight seat availability")
                             return {'status': 'error', 'message': 'Failed to update flight seat availability'}
@@ -78,6 +105,19 @@ async def create_reservation(user_email, flight_id):
             return {'status': 'error', 'message': 'No available seats'}
 
 async def get_user_reservations(user_email):
+    """
+    Récupère les réservations d'un utilisateur par son email.
+
+    Args:
+        user_email (str): L'email de l'utilisateur.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et les données des réservations.
+
+    Exemple:
+        reservations = await get_user_reservations("user@example.com")
+        print(reservations)
+    """
     async with aiohttp.ClientSession() as session:
         # Get client data by email
         client_url = f'http://127.0.0.1:8002/API-client/clients/?email={user_email}'
@@ -115,6 +155,19 @@ async def get_user_reservations(user_email):
                 return {'status': 'error', 'message': 'Failed to fetch reservations'}
 
 async def cancel_reservation(reservation_id):
+    """
+    Annule une réservation par son ID.
+
+    Args:
+        reservation_id (int): L'ID de la réservation.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        response = await cancel_reservation(1)
+        print(response)
+    """
     async with aiohttp.ClientSession() as session:
         # Get reservation data
         reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
@@ -152,6 +205,16 @@ async def cancel_reservation(reservation_id):
                 return {'status': 'error', 'message': 'Failed to cancel reservation'}
 
 async def get_all_reservations():
+    """
+    Récupère toutes les réservations.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et les données des réservations.
+
+    Exemple:
+        reservations = await get_all_reservations()
+        print(reservations)
+    """
     async with aiohttp.ClientSession() as session:
         reservations_url = 'http://127.0.0.1:8002/API-reservation/reservations/'
         async with session.get(reservations_url) as reservations_response:
@@ -182,6 +245,19 @@ async def get_all_reservations():
                 return {'status': 'error', 'message': 'Failed to fetch reservations'}
 
 async def validate_reservation(reservation_id):
+    """
+    Valide une réservation par son ID.
+
+    Args:
+        reservation_id (int): L'ID de la réservation.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        response = await validate_reservation(1)
+        print(response)
+    """
     async with aiohttp.ClientSession() as session:
         # Get reservation data
         reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
@@ -202,6 +278,19 @@ async def validate_reservation(reservation_id):
                 return {'status': 'error', 'message': 'Failed to validate reservation'}
 
 async def revert_validate_reservation(reservation_id):
+    """
+    Annule la validation d'une réservation par son ID.
+
+    Args:
+        reservation_id (int): L'ID de la réservation.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        response = await revert_validate_reservation(1)
+        print(response)
+    """
     async with aiohttp.ClientSession() as session:
         # Get reservation data
         reservation_url = f'http://127.0.0.1:8002/API-reservation/reservations/{reservation_id}/'
@@ -222,6 +311,12 @@ async def revert_validate_reservation(reservation_id):
                 return {'status': 'error', 'message': 'Failed to revert reservation validation'}
 
 async def run_reservations():
+    """
+    Exécute les opérations de gestion des réservations via NATS.
+
+    Exemple:
+        asyncio.run(run_reservations())
+    """
     nc = NATS()
 
     # Connect to the NATS server
@@ -233,6 +328,15 @@ async def run_reservations():
         return
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur les sujets liés aux réservations.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         data = msg.data.decode()
@@ -284,7 +388,6 @@ async def run_reservations():
         except Exception as e:
             logging.error(f"Failed to subscribe to subject '{subject}': {e}")
 
-    
     try:
         while True:
             await asyncio.sleep(1)

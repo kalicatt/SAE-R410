@@ -156,11 +156,23 @@ async def get_client_money_by_email(email):
 async def run_login_signup():
     """
     Exécute le processus de connexion, d'inscription et de vérification d'email via NATS.
+
+    Exemple:
+        asyncio.run(run_login_signup())
     """
     nc = NATS()
     await nc.connect(servers=["nats://localhost:4222"])
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur les sujets 'signup', 'login', 'verify_email', et 'get_client_money'.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         data = msg.data.decode()

@@ -8,6 +8,26 @@ import asyncio
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 async def process_payment(nc, payment_data):
+    """
+    Traite un paiement en vérifiant le solde du client, en enregistrant le paiement et en mettant à jour le statut de la réservation.
+
+    Args:
+        nc (NATS): Le client NATS.
+        payment_data (dict): Les données du paiement, incluant 'client_email', 'amount', 'reservation_id' et 'method'.
+
+    Returns:
+        dict: Un dictionnaire contenant le statut de l'opération et un message.
+
+    Exemple:
+        payment_data = {
+            'client_email': 'client@example.com',
+            'amount': 100.0,
+            'reservation_id': 1,
+            'method': 'credit_card'
+        }
+        result = await process_payment(nc, payment_data)
+        print(result)
+    """
     logging.debug("Processing payment with data: %s", payment_data)
     async with aiohttp.ClientSession() as session:
         # Simuler une demande de paiement à la banque
@@ -61,6 +81,12 @@ async def process_payment(nc, payment_data):
             return {'status': 'error', 'message': 'Payment failed'}
 
 async def run_payment():
+    """
+    Exécute le traitement des paiements via NATS.
+
+    Exemple:
+        asyncio.run(run_payment())
+    """
     logging.debug("Connecting to NATS server...")
     nc = NATS()
     await nc.connect(servers=["nats://localhost:4222"])
@@ -68,6 +94,15 @@ async def run_payment():
     logging.debug("Connected to NATS server. Subscribing to 'process_payment'...")
 
     async def message_handler(msg):
+        """
+        Gère les messages reçus sur le sujet 'process_payment'.
+
+        Args:
+            msg: Le message reçu de NATS.
+
+        Returns:
+            None
+        """
         subject = msg.subject
         reply = msg.reply
         data = json.loads(msg.data.decode())

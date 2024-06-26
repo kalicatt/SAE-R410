@@ -1,26 +1,46 @@
-Projet SAE
+# Projet SAE
 
-Pour pouvoir lancer les différents services il vous faudra :
+## Instructions de déploiement
 
-- Vous rendre dans le fichier cmd et executer la commande pour cree le conteneur NATS
-- Vous rendre dans le projet Aeroport_project et executer la commande **docker-compose up --build**
-- Vous rendre dans le projet Frontend et executer la commande  **docker-compose up --build**
-- Vous rendre dans le fichier database et executer la commande **docker-compose up --build**
+### Étapes pour lancer les services
 
+1. **Démarrer le conteneur NATS**:
+   - Accédez au dossier `cmd` et exécutez la commande pour créer le conteneur NATS.
 
-Pour pouvoir utiliser correctement la database nous vous recommandons d'effectuer les commandes "**makemigrations** & **migrate**" dans chacun des conteneur projet pour pouvoir avoir accès a toutes les tables.
+2. **Démarrer le projet Aeroport**:
+   - Accédez au dossier `Aeroport_project` et exécutez la commande :
+     ```sh
+     docker-compose up --build
+     ```
 
+3. **Démarrer le projet Frontend**:
+   - Accédez au dossier `Frontend` et exécutez la commande :
+     ```sh
+     docker-compose up --build
+     ```
 
+4. **Démarrer la base de données**:
+   - Accédez au dossier `database` et exécutez la commande :
+     ```sh
+     docker-compose up --build
+     ```
 
-En dernier lieu, il faudra vous rendre dans le fichier service et executer le script run_nats.py, uqi activeras tout les micros services
+### Configuration de la base de données
 
+Pour utiliser correctement la base de données, il est recommandé d'exécuter les commandes `makemigrations` et `migrate` dans chaque conteneur projet pour s'assurer de la création de toutes les tables nécessaires.
 
+### Démarrage des microservices
 
-En fonction de votre configuration, les parametres de connexion a la base de données, notamment dans les fichier **settings.py** doivent être changer (adpater a votre configuration), pour pouvoir fonctionner correctement.
+Pour activer tous les microservices, accédez au dossier `service` et exécutez le script `run_nats.py`.
 
-En fonction de votre configuration, certains paramètres des conteneur peuvent aussi changer (entre windows et mac), adpatez a votre configuration, notamment les adressages ou certaines logiques.
+### Configuration spécifique
 
+- **Paramètres de connexion à la base de données** :
+  - Adaptez les paramètres dans le fichier `settings.py` en fonction de votre configuration pour assurer le bon fonctionnement.
 
+- **Paramètres des conteneurs** :
+  - En fonction de votre système d'exploitation (Windows ou Mac), certains paramètres des conteneurs peuvent nécessiter des ajustements, notamment les adresses et certaines logiques.
 
+### Support
 
-Pour toutes questions n'hesitez pas a nous contacter.
+Pour toute question, n'hésitez pas à nous contacter.

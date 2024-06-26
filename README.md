@@ -31,7 +31,7 @@ Pour utiliser correctement la base de données, il est recommandé d'exécuter l
 
 ### Démarrage des microservices
 
-Pour activer tous les microservices, accédez au dossier `service` et exécutez le script `run_nats.py`.
+Pour activer tous les microservices, accédez au dossier `services` et exécutez le script `run_nats.py`.
 
 ### Configuration spécifique
 
